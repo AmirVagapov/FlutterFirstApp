@@ -10,12 +10,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-          primarySwatch: Colors.deepOrange, accentColor: Colors.purple, brightness: Brightness.light),
+         // buttonTheme: ButtonThemeData(buttonColor: Colors.lightBlue),
+          primarySwatch: Colors.deepOrange,
+          accentColor: Colors.purple,
+          brightness: Brightness.light),
       home: Scaffold(
         appBar: AppBar(
           title: Text('EasyList'),
         ),
-        body: ProductManager('Food tester'),
+        body: ProductManager(startingProduct: 'Food tester'),
       ),
     );
   }
