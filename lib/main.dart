@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_course/pages/home_page.dart';
 
 import 'package:flutter_course/product_manager.dart';
 
-main() { 
+main() {
   // debugPaintSizeEnabled = true;
   // debugPaintBaselinesEnabled = true;
   // debugPaintPointersEnabled = true;
@@ -17,16 +18,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       // debugShowMaterialGrid: true,
       theme: ThemeData(
-         // buttonTheme: ButtonThemeData(buttonColor: Colors.lightBlue),
+          // buttonTheme: ButtonThemeData(buttonColor: Colors.lightBlue),
           primarySwatch: Colors.deepOrange,
           accentColor: Colors.purple,
           brightness: Brightness.light),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('EasyList'),
-        ),
-        body: ProductManager(),
-      ),
+      home: HomePage(),
     );
   }
 }
