@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_course/pages/home_page.dart';
+import 'package:flutter_course/pages/auth.dart';
+
 
 import 'package:flutter_course/product_manager.dart';
 
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.deepOrange,
           accentColor: Colors.purple,
           brightness: Brightness.light),
-      home: HomePage(),
+      home: AuthPage(),
     );
   }
 }
