@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_course/pages/product_create.dart';
-import 'package:flutter_course/pages/products.dart';
 import 'package:flutter_course/pages/products_list.dart';
 
 class ProductsAdminPage extends StatelessWidget {
+  final Function addProduct;
+  final Function deleteProduct;
+
+  ProductsAdminPage(this.addProduct, this.deleteProduct);
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -14,12 +18,13 @@ class ProductsAdminPage extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 AppBar(
+                  automaticallyImplyLeading: false,
                   title: Text("Choose"),
                 ),
                 ListTile(
                   title: Text("Products List"),
                   onTap: () {
-                    Navigator.pushReplacementNamed(context, "/");
+                    Navigator.pushReplacementNamed(context, "/products");
                   },
                 )
               ],
@@ -35,7 +40,10 @@ class ProductsAdminPage extends StatelessWidget {
             ),
           ),
           body: TabBarView(
-            children: <Widget>[ProductCreatePage(), ProductsListPage()],
+            children: <Widget>[
+              ProductCreatePage(addProduct),
+              ProductsListPage()
+            ],
           ),
         ));
   }
