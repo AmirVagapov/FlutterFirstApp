@@ -13,57 +13,102 @@ class ProductCreatePage extends StatefulWidget {
 }
 
 class _ProductCreatePageState extends State<ProductCreatePage> {
-  String _titleValue;
-  String _descriptionValue;
-  double _priceValue;
+  final Map<String, dynamic> _formData = {
+    "title": null,
+    "description": null,
+    "price": null,
+    "image": "assets/food.jpg"
+  };
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Widget _builTitleTextField() {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Product Title"),
+      validator: (String value) {
+        if (value.isEmpty) {
+          return "Title is required";
+        }
+      },
+      onSaved: (String value) {
+        _formData["title"] = value;
+      },
+    );
+  }
+
+  Widget _buildDescriptionTextField() {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Product Description"),
+      validator: (String value) {
+        if (value.isEmpty || value.length < 5) {
+          return "Description is required and should be at least 5 characters";
+        }
+      },
+      onSaved: (String value) {
+        _formData["description"] = value;
+      },
+      maxLines: 4,
+    );
+  }
+
+  Widget _buildPriceTextField() {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Product Price, \$"),
+      validator: (String value) {
+        if (double.tryParse(value.replaceFirst(RegExp(r','), '.')) == null) {
+          return "Price is required and should be a number";
+        }
+      },
+      onSaved: (String value) {
+        _formData["price"] =
+            double.parse(value.replaceFirst(RegExp(r','), '.'));
+      },
+      keyboardType: TextInputType.number,
+    );
+  }
+
+  void _submitForm() {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+    widget.addProduct(_formData);
+    Navigator.pushReplacementNamed(context, "/products");
+  }
+
+  double _getTargetPadding(BuildContext context) {
+    final bool isPortraitOrientation =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double targetPadding = isPortraitOrientation ? 0 : screenWidth / 8;
+    return targetPadding;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).detach();
+      },
+      child: Container(
         padding: EdgeInsets.all(10.0),
-        child: ListView(children: <Widget>[
-          TextField(
-            decoration: InputDecoration(labelText: "Product Title"),
-            onChanged: (String value) {
-              setState(() {
-                _titleValue = value;
-              });
-            },
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: "Product Description"),
-            onChanged: (String value) {
-              setState(() {
-                _descriptionValue = value;
-              });
-            },
-            maxLines: 4,
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: "Product Price, \$"),
-            onChanged: (String value) {
-              setState(() {
-                _priceValue = double.parse(value);
-              });
-            },
-            keyboardType: TextInputType.number,
-          ),
-          SizedBox(height: 10.0),
-          RaisedButton(
-            color: Theme.of(context).accentColor,
-            textColor: Colors.white,
-            child: Text("SAVE"),
-            onPressed: () {
-              final Map<String, dynamic> product = {
-                "title": _titleValue,
-                "description": _descriptionValue,
-                "price": _priceValue,
-                "image": "assets/food.jpg"
-              };
-              widget.addProduct(product);
-              Navigator.pushReplacementNamed(context, "/products");
-            },
-          )
-        ]));
+        child: Form(
+          key: _formKey,
+          child: ListView(
+              padding:
+                  EdgeInsets.symmetric(horizontal: _getTargetPadding(context)),
+              children: <Widget>[
+                _builTitleTextField(),
+                _buildDescriptionTextField(),
+                _buildPriceTextField(),
+                SizedBox(height: 10.0),
+                RaisedButton(
+                  textColor: Colors.white,
+                  child: Text("SAVE"),
+                  onPressed: _submitForm,
+                )
+              ]),
+        ),
+      ),
+    );
   }
 }

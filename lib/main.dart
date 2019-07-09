@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_course/pages/auth.dart';
 import 'package:flutter_course/pages/product.dart';
 import 'package:flutter_course/pages/products.dart';
 import 'package:flutter_course/pages/products_admin.dart';
-
-import 'package:flutter_course/product_manager.dart';
 
 main() {
   // debugPaintSizeEnabled = true;
@@ -41,7 +40,8 @@ class _MyAppState extends State<MyApp> {
           // buttonTheme: ButtonThemeData(buttonColor: Colors.lightBlue),
           primarySwatch: Colors.deepOrange,
           accentColor: Colors.purple,
-          brightness: Brightness.light),
+          brightness: Brightness.light,
+          buttonColor: Colors.purple),
       // home: AuthPage(),
       routes: {
         "/": (BuildContext context) => AuthPage(),
@@ -60,7 +60,10 @@ class _MyAppState extends State<MyApp> {
           final int index = int.parse(pathElements[2]);
           return MaterialPageRoute<bool>(
               builder: (BuildContext context) => ProductPage(
-                  _products[index]["title"], _products[index]["image"]));
+                  _products[index]["title"],
+                  _products[index]["image"],
+                  _products[index]["description"],
+                  _products[index]["price"]));
         }
         return null;
       },
