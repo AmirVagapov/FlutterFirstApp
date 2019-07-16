@@ -12,6 +12,8 @@ class _AuthPageState extends State<AuthPage> {
   String _email;
   String _password;
   bool _acceptTerms = false;
+  Function _submitFunction;
+  final GlobalKey<FormState> _authFormKey = GlobalKey<FormState>();
 
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
@@ -22,25 +24,33 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Widget _buildEmailTextField() {
-    return TextField(
+    return TextFormField(
       keyboardType: TextInputType.emailAddress,
       decoration: _buildTextFieldInputDecoration("Enter your email"),
-      onChanged: (String value) {
-        setState(() {
-          _email = value;
-        });
+      validator: (String value) {
+        final bool isValidEmail =
+            value.length < 5 || !value.contains("@") || !value.contains(".") || value.split('.').last.isEmpty;
+        if (isValidEmail) {
+          return "Invalid email";
+        }
+      },
+      onSaved: (String value) {
+        _email = value;
       },
     );
   }
 
   Widget _buildPasswordTextField() {
-    return TextField(
+    return TextFormField(
       obscureText: true,
       decoration: _buildTextFieldInputDecoration("Enter password"),
-      onChanged: (String value) {
-        setState(() {
-          _password = value;
-        });
+      validator: (String value) {
+        if (value.length < 5) {
+          return "Password should contains at least 5 character";
+        }
+      },
+      onSaved: (String value) {
+        _password = value;
       },
     );
   }
@@ -65,6 +75,7 @@ class _AuthPageState extends State<AuthPage> {
           value: _acceptTerms,
           onChanged: (bool value) {
             setState(() {
+              _submitFunction = value ? _acceptForm : null;
               _acceptTerms = value;
             });
           },
@@ -72,9 +83,8 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   void _acceptForm() {
-    if (_email == null || _password == null || !_acceptTerms) {
-      return;
-    }
+    if (!_authFormKey.currentState.validate()) return;
+    _authFormKey.currentState.save();
     Navigator.pushReplacementNamed(context, '/products');
   }
 
@@ -88,30 +98,42 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Authentification"),
-        ),
-        body: Container(
-            decoration: BoxDecoration(image: _buildBackgroundImage()),
-            padding: EdgeInsets.only(left: 10.0, right: 10.0),
-            child: Center(
-                child: SingleChildScrollView(
-                    child: Container(
-              width: _getTargetWidth(context),
-              child: Column(children: [
-                SizedBox(height: 10.0),
-                _buildEmailTextField(),
-                SizedBox(height: 10.0),
-                _buildPasswordTextField(),
-                SizedBox(height: 10.0),
-                _buildAcceptSwitch(),
-                SizedBox(height: 10.0),
-                RaisedButton(
-                  textColor: Colors.white,
-                  child: Text("Login"),
-                  onPressed: _acceptForm,
+      appBar: AppBar(
+        title: Text("Authentification"),
+      ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).detach();
+        },
+        child: Container(
+          decoration: BoxDecoration(image: _buildBackgroundImage()),
+          padding: EdgeInsets.only(left: 10.0, right: 10.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Container(
+                width: _getTargetWidth(context),
+                child: Form(
+                  key: _authFormKey,
+                  child: Column(children: [
+                    SizedBox(height: 10.0),
+                    _buildEmailTextField(),
+                    SizedBox(height: 10.0),
+                    _buildPasswordTextField(),
+                    SizedBox(height: 10.0),
+                    _buildAcceptSwitch(),
+                    SizedBox(height: 10.0),
+                    RaisedButton(
+                      textColor: Colors.white,
+                      child: Text("Login"),
+                      onPressed: _submitFunction,
+                    ),
+                  ]),
                 ),
-              ]),
-            )))));
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

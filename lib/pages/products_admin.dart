@@ -1,13 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_course/pages/product_create.dart';
+import 'package:flutter_course/pages/product_edit.dart';
 import 'package:flutter_course/pages/products_list.dart';
 
-class ProductsAdminPage extends StatelessWidget {
-  final Function addProduct;
-  final Function deleteProduct;
 
-  ProductsAdminPage(this.addProduct, this.deleteProduct);
+class ProductsAdminPage extends StatelessWidget {
 
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
@@ -46,7 +43,7 @@ class ProductsAdminPage extends StatelessWidget {
           ),
           body: TabBarView(
             children: <Widget>[
-              ProductCreatePage(addProduct),
+              ProductEditPage(),
               ProductsListPage()
             ],
           ),
