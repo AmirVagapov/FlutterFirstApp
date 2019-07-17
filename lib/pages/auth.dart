@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
+
+import '../scoped-models/main.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -12,7 +15,7 @@ class _AuthPageState extends State<AuthPage> {
   String _email;
   String _password;
   bool _acceptTerms = false;
-  Function _submitFunction;
+
   final GlobalKey<FormState> _authFormKey = GlobalKey<FormState>();
 
   DecorationImage _buildBackgroundImage() {
@@ -75,16 +78,16 @@ class _AuthPageState extends State<AuthPage> {
           value: _acceptTerms,
           onChanged: (bool value) {
             setState(() {
-              _submitFunction = value ? _acceptForm : null;
               _acceptTerms = value;
             });
           },
         ));
   }
 
-  void _acceptForm() {
-    if (!_authFormKey.currentState.validate()) return;
+  void _acceptForm(Function login) {
+    if (!_authFormKey.currentState.validate() || !_acceptTerms) return;
     _authFormKey.currentState.save();
+    login(_email, _password);
     Navigator.pushReplacementNamed(context, '/products');
   }
 
@@ -122,11 +125,13 @@ class _AuthPageState extends State<AuthPage> {
                     SizedBox(height: 10.0),
                     _buildAcceptSwitch(),
                     SizedBox(height: 10.0),
-                    RaisedButton(
+                    ScopedModelDescendant<MainModel>(builder: (BuildContext context, Widget child, MainModel model) {
+                      return RaisedButton(
                       textColor: Colors.white,
                       child: Text("Login"),
-                      onPressed: _submitFunction,
-                    ),
+                      onPressed: () => _acceptForm(model.login),
+                    );
+                    },)
                   ]),
                 ),
               ),

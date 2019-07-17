@@ -2,33 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_course/widgets/ui_elements/title_default.dart';
 import 'package:scoped_model/scoped_model.dart';
-import '../scoped-models/products.dart';
-
+import '../scoped-models/main.dart';
 
 class ProductPage extends StatelessWidget {
   final int index;
 
   ProductPage(this.index);
-
-  Widget _buildAddressPriceRow(double price) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          "Union Square, San Francisco",
-          style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
-        ),
-        Container(
-          child: Text("|"),
-          padding: EdgeInsets.symmetric(horizontal: 5.0),
-        ),
-        Text(
-          "\$$price",
-          style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
-        )
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +15,9 @@ class ProductPage extends StatelessWidget {
       print("On back pressed");
       Navigator.pop(context, false);
       return Future.value(false);
-    }, child: ScopedModelDescendant<ProductsModel>(
-      builder: (BuildContext context, Widget widget, ProductsModel model) {
-        final product = model.products[index];
+    }, child: ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget widget, MainModel model) {
+        final product = model.allProducts[index];
         return Scaffold(
           appBar: AppBar(
             title: Text(product.title),
@@ -62,5 +41,25 @@ class ProductPage extends StatelessWidget {
         );
       },
     ));
+  }
+
+  Widget _buildAddressPriceRow(double price) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          "Union Square, San Francisco",
+          style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+        ),
+        Container(
+          child: Text("|"),
+          padding: EdgeInsets.symmetric(horizontal: 5.0),
+        ),
+        Text(
+          "\$$price",
+          style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+        )
+      ],
+    );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../models/product.dart';
-import '../scoped-models/products.dart';
+import '../scoped-models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -68,26 +68,22 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm(Function addProduct, Function updateProduct,
+  void _submitForm(
+      Function addProduct, Function updateProduct, Function selectProduct,
       [int selectedProductIndex]) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
     if (selectedProductIndex == null) {
-      addProduct(Product(
-          title: _formData["title"],
-          description: _formData["description"],
-          price: _formData["price"],
-          image: _formData["image"]));
+      addProduct(_formData["title"], _formData["description"],
+          _formData["image"], _formData["price"]);
     } else {
-      updateProduct(Product(
-          title: _formData["title"],
-          description: _formData["description"],
-          price: _formData["price"],
-          image: _formData["image"]));
+      updateProduct(_formData["title"], _formData["description"],
+          _formData["image"], _formData["price"]);
     }
-    Navigator.pushReplacementNamed(context, "/products");
+    Navigator.pushReplacementNamed(context, "/products")
+        .then((_) => selectProduct(null));
   }
 
   double _getTargetPadding(BuildContext context) {
@@ -109,23 +105,24 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildPage() {
-    return ScopedModelDescendant<ProductsModel>(
-      builder: (BuildContext context, Widget child, ProductsModel model) {
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
         return model.selectedProductIndex == null
             ? _buildContentBody()
-            : _buildPageWithAppBar(model.selectedProduct);
+            : _buildPageWithAppBar(
+                model.selectedProduct, model.selProductIndex);
       },
     );
   }
 
   Widget _buildSubmitButton() {
-    return ScopedModelDescendant<ProductsModel>(
-      builder: (BuildContext context, Widget child, ProductsModel model) {
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
         return RaisedButton(
           textColor: Colors.white,
           child: Text("SAVE"),
           onPressed: () => _submitForm(model.addProduct, model.updateProduct,
-              model.selectedProductIndex),
+              model.selProductIndex, model.selectedProductIndex),
         );
       },
     );
@@ -150,7 +147,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  Widget _buildPageWithAppBar(Product product) {
+  Widget _buildPageWithAppBar(Product product, Function selectProduct) {
     return Scaffold(
       appBar: AppBar(title: Text("Edit Product")),
       body: _buildContentBody(product),
