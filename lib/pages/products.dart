@@ -4,7 +4,24 @@ import 'package:scoped_model/scoped_model.dart';
 
 import '../scoped-models/main.dart';
 
-class ProductsPage extends StatelessWidget {
+class ProductsPage extends StatefulWidget {
+  final MainModel model;
+
+  ProductsPage(this.model);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _ProductPageState();
+  }
+}
+
+class _ProductPageState extends State<ProductsPage> {
+  @override
+  void initState() {
+    widget.model.fetchProducts();
+    super.initState();
+  }
+
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
         child: Column(
@@ -24,6 +41,24 @@ class ProductsPage extends StatelessWidget {
     ));
   }
 
+  Widget _buildProductList() {
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        Widget content = Center(
+          child: Text("Product list is empty"),
+        );
+        if (model.displayedProducts.isNotEmpty && !model.isLoading) {
+          content = Products();
+        } else if (model.isLoading) {
+          content = Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return content;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,8 +66,8 @@ class ProductsPage extends StatelessWidget {
         appBar: AppBar(
           title: Text("EasyList"),
           actions: <Widget>[
-            ScopedModelDescendant<MainModel>(builder:
-                (BuildContext context, Widget child, MainModel model) {
+            ScopedModelDescendant<MainModel>(
+                builder: (BuildContext context, Widget child, MainModel model) {
               return IconButton(
                 icon: Icon(model.displayFavoritesOnly
                     ? Icons.favorite
@@ -44,6 +79,6 @@ class ProductsPage extends StatelessWidget {
             })
           ],
         ),
-        body: Products());
+        body: _buildProductList());
   }
 }
