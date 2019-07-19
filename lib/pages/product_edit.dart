@@ -20,6 +20,53 @@ class _ProductEditPageState extends State<ProductEditPage> {
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).detach();
+      },
+      child: _buildPage(),
+    );
+  }
+
+  Widget _buildPage() {
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return model.selectedProductIndex == null
+            ? _buildContentBody()
+            : _buildPageWithAppBar(
+                model.selectedProduct, model.selProductIndex);
+      },
+    );
+  }
+
+  Widget _buildContentBody([Product product]) {
+    return Container(
+      padding: EdgeInsets.all(10.0),
+      child: Form(
+        key: _formKey,
+        child: ListView(
+            padding:
+                EdgeInsets.symmetric(horizontal: _getTargetPadding(context)),
+            children: <Widget>[
+              _builTitleTextField(product),
+              _buildDescriptionTextField(product),
+              _buildPriceTextField(product),
+              SizedBox(height: 10.0),
+              _buildSubmitButton()
+            ]),
+      ),
+    );
+  }
+
+  Widget _buildPageWithAppBar(Product product, Function selectProduct) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Edit Product")),
+      body: _buildContentBody(product),
+    );
+  }
+
   Widget _builTitleTextField(Product product) {
     return TextFormField(
       decoration: InputDecoration(labelText: "Product Title"),
@@ -68,55 +115,6 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm(
-      Function addProduct, Function updateProduct, Function selectProduct,
-      [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate()) {
-      return;
-    }
-    _formKey.currentState.save();
-    if (selectedProductIndex == null) {
-      addProduct(_formData["title"], _formData["description"],
-              _formData["image"], _formData["price"])
-          .then((_) {
-        Navigator.pushReplacementNamed(context, "/products")
-            .then((_) => selectProduct(null));
-      });
-    } else {
-      updateProduct(_formData["title"], _formData["description"],
-          _formData["image"], _formData["price"]);
-    }
-  }
-
-  double _getTargetPadding(BuildContext context) {
-    final bool isPortraitOrientation =
-        MediaQuery.of(context).orientation == Orientation.portrait;
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double targetPadding = isPortraitOrientation ? 0 : screenWidth / 8;
-    return targetPadding;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).detach();
-      },
-      child: _buildPage(),
-    );
-  }
-
-  Widget _buildPage() {
-    return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget child, MainModel model) {
-        return model.selectedProductIndex == null
-            ? _buildContentBody()
-            : _buildPageWithAppBar(
-                model.selectedProduct, model.selProductIndex);
-      },
-    );
-  }
-
   Widget _buildSubmitButton() {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
@@ -135,29 +133,35 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  Widget _buildContentBody([Product product]) {
-    return Container(
-      padding: EdgeInsets.all(10.0),
-      child: Form(
-        key: _formKey,
-        child: ListView(
-            padding:
-                EdgeInsets.symmetric(horizontal: _getTargetPadding(context)),
-            children: <Widget>[
-              _builTitleTextField(product),
-              _buildDescriptionTextField(product),
-              _buildPriceTextField(product),
-              SizedBox(height: 10.0),
-              _buildSubmitButton()
-            ]),
-      ),
-    );
+  void _submitForm(
+      Function addProduct, Function updateProduct, Function selectProduct,
+      [int selectedProductIndex]) {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+    if (selectedProductIndex == null) {
+      addProduct(_formData["title"], _formData["description"],
+              _formData["image"], _formData["price"])
+          .then((_) {
+        Navigator.pushReplacementNamed(context, "/products")
+            .then((_) => selectProduct(null));
+      });
+    } else {
+      updateProduct(_formData["title"], _formData["description"],
+              _formData["image"], _formData["price"])
+          .then((_) {
+        Navigator.pushReplacementNamed(context, "/products")
+            .then((_) => selectProduct(null));
+      });
+    }
   }
 
-  Widget _buildPageWithAppBar(Product product, Function selectProduct) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Edit Product")),
-      body: _buildContentBody(product),
-    );
+  double _getTargetPadding(BuildContext context) {
+    final bool isPortraitOrientation =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double targetPadding = isPortraitOrientation ? 0 : screenWidth / 8;
+    return targetPadding;
   }
 }

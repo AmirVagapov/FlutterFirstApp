@@ -3,16 +3,35 @@ import 'package:flutter_course/pages/product_edit.dart';
 import 'package:flutter_course/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-class ProductsListPage extends StatelessWidget {
+class ProductsListPage extends StatefulWidget {
+  final MainModel model;
+
+  ProductsListPage(this.model);
+
+  @override
+  State<StatefulWidget> createState() {
+    return ProductListPageState();
+  }
+}
+
+class ProductListPageState extends State<ProductsListPage> {
+  @override
+  void initState() {
+    widget.model.fetchProducts();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
-      return ListView.builder(
-        itemBuilder: (BuildContext context, int index) =>
-            _buildListItem(context, index, model),
-        itemCount: model.allProducts.length,
-      );
+      return RefreshIndicator(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) =>
+                _buildListItem(context, index, model),
+            itemCount: model.allProducts.length,
+          ),
+          onRefresh: model.fetchProducts);
     });
   }
 

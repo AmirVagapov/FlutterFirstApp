@@ -18,6 +18,53 @@ class _AuthPageState extends State<AuthPage> {
 
   final GlobalKey<FormState> _authFormKey = GlobalKey<FormState>();
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Authentification"),
+      ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).detach();
+        },
+        child: Container(
+          decoration: BoxDecoration(image: _buildBackgroundImage()),
+          padding: EdgeInsets.only(left: 10.0, right: 10.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Container(
+                width: _getTargetWidth(context),
+                child: Form(
+                  key: _authFormKey,
+                  child: Column(children: [
+                    SizedBox(height: 10.0),
+                    _buildEmailTextField(),
+                    SizedBox(height: 10.0),
+                    _buildPasswordTextField(),
+                    SizedBox(height: 10.0),
+                    _buildAcceptSwitch(),
+                    SizedBox(height: 10.0),
+                    ScopedModelDescendant<MainModel>(
+                      builder: (BuildContext context, Widget child,
+                          MainModel model) {
+                        return RaisedButton(
+                          textColor: Colors.white,
+                          child: Text("Login"),
+                          onPressed: () => _acceptForm(model.login),
+                        );
+                      },
+                    )
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
         colorFilter:
@@ -31,8 +78,10 @@ class _AuthPageState extends State<AuthPage> {
       keyboardType: TextInputType.emailAddress,
       decoration: _buildTextFieldInputDecoration("Enter your email"),
       validator: (String value) {
-        final bool isValidEmail =
-            value.length < 5 || !value.contains("@") || !value.contains(".") || value.split('.').last.isEmpty;
+        final bool isValidEmail = value.length < 5 ||
+            !value.contains("@") ||
+            !value.contains(".") ||
+            value.split('.').last.isEmpty;
         if (isValidEmail) {
           return "Invalid email";
         }
@@ -96,49 +145,5 @@ class _AuthPageState extends State<AuthPage> {
         MediaQuery.of(context).orientation == Orientation.portrait;
     final double screenWidth = MediaQuery.of(context).size.width;
     return isPortraitOrientation ? screenWidth : screenWidth * 0.6;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Authentification"),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).detach();
-        },
-        child: Container(
-          decoration: BoxDecoration(image: _buildBackgroundImage()),
-          padding: EdgeInsets.only(left: 10.0, right: 10.0),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Container(
-                width: _getTargetWidth(context),
-                child: Form(
-                  key: _authFormKey,
-                  child: Column(children: [
-                    SizedBox(height: 10.0),
-                    _buildEmailTextField(),
-                    SizedBox(height: 10.0),
-                    _buildPasswordTextField(),
-                    SizedBox(height: 10.0),
-                    _buildAcceptSwitch(),
-                    SizedBox(height: 10.0),
-                    ScopedModelDescendant<MainModel>(builder: (BuildContext context, Widget child, MainModel model) {
-                      return RaisedButton(
-                      textColor: Colors.white,
-                      child: Text("Login"),
-                      onPressed: () => _acceptForm(model.login),
-                    );
-                    },)
-                  ]),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

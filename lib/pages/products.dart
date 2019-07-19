@@ -22,6 +22,29 @@ class _ProductPageState extends State<ProductsPage> {
     super.initState();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        drawer: _buildSideDrawer(context),
+        appBar: AppBar(
+          title: Text("EasyList"),
+          actions: <Widget>[
+            ScopedModelDescendant<MainModel>(
+                builder: (BuildContext context, Widget child, MainModel model) {
+              return IconButton(
+                icon: Icon(model.displayFavoritesOnly
+                    ? Icons.favorite
+                    : Icons.favorite_border),
+                onPressed: () {
+                  model.toggleFavoriteMode();
+                },
+              );
+            })
+          ],
+        ),
+        body: _buildProductList());
+  }
+
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
         child: Column(
@@ -54,31 +77,8 @@ class _ProductPageState extends State<ProductsPage> {
             child: CircularProgressIndicator(),
           );
         }
-        return content;
+        return RefreshIndicator(child: content, onRefresh: model.fetchProducts);
       },
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        drawer: _buildSideDrawer(context),
-        appBar: AppBar(
-          title: Text("EasyList"),
-          actions: <Widget>[
-            ScopedModelDescendant<MainModel>(
-                builder: (BuildContext context, Widget child, MainModel model) {
-              return IconButton(
-                icon: Icon(model.displayFavoritesOnly
-                    ? Icons.favorite
-                    : Icons.favorite_border),
-                onPressed: () {
-                  model.toggleFavoriteMode();
-                },
-              );
-            })
-          ],
-        ),
-        body: _buildProductList());
   }
 }

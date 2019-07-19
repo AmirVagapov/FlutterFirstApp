@@ -5,12 +5,28 @@ import 'package:scoped_model/scoped_model.dart';
 import './price_tag.dart';
 import '../../models/product.dart';
 import '../../scoped-models/main.dart';
+import '../ui_elements/network_image_with_placeholder.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
   final int productIndex;
 
   ProductCard(this.product, this.productIndex);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        children: <Widget>[
+          NetworkImageWithPlaceholder(product.image),
+          _buildTitlePriceContainer(),
+          AddressTag("Union Square, San Francisco"),
+          Text(product.userEmail),
+          _buildButtonActions(context)
+        ],
+      ),
+    );
+  }
 
   Widget _buildTitlePriceContainer() {
     return Container(
@@ -48,21 +64,5 @@ class ProductCard extends StatelessWidget {
         );
       },
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: <Widget>[
-          Image.network(product.image),
-          _buildTitlePriceContainer(),
-          AddressTag("Union Square, San Francisco"),
-          Text(product.userEmail),
-          _buildButtonActions(context)
-        ],
-      ),
-    );
-
   }
 }

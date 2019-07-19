@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course/widgets/ui_elements/network_image_with_placeholder.dart';
 import 'package:flutter_course/widgets/ui_elements/title_default.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../scoped-models/main.dart';
@@ -24,7 +25,7 @@ class ProductPage extends StatelessWidget {
           ),
           body: SingleChildScrollView(
             child: Column(children: [
-              Image.asset(product.image),
+              NetworkImageWithPlaceholder(product.image),
               SizedBox(height: 10.0),
               TitleDefault(product.title),
               SizedBox(height: 10.0),
