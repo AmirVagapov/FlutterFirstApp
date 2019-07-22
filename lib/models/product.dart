@@ -10,6 +10,8 @@ class Product {
   final String userId;
   final bool isFavorite;
 
+  static final String DEFAULT_ID = "";
+
   Product(
       {@required this.id,
       @required this.title,

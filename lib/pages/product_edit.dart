@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../models/product.dart';
 import '../scoped-models/main.dart';
@@ -33,10 +34,9 @@ class _ProductEditPageState extends State<ProductEditPage> {
   Widget _buildPage() {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
-        return model.selectedProductIndex == null
+        return model.selectedProductIndex == -1
             ? _buildContentBody()
-            : _buildPageWithAppBar(
-                model.selectedProduct, model.selProductIndex);
+            : _buildPageWithAppBar(model.selectedProduct);
       },
     );
   }
@@ -60,7 +60,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  Widget _buildPageWithAppBar(Product product, Function selectProduct) {
+  Widget _buildPageWithAppBar(Product product) {
     return Scaffold(
       appBar: AppBar(title: Text("Edit Product")),
       body: _buildContentBody(product),
@@ -126,7 +126,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 onPressed: () => _submitForm(
                     model.addProduct,
                     model.updateProduct,
-                    model.selProductIndex,
+                    model.selectProduct,
                     model.selectedProductIndex),
               );
       },
@@ -140,21 +140,34 @@ class _ProductEditPageState extends State<ProductEditPage> {
       return;
     }
     _formKey.currentState.save();
-    if (selectedProductIndex == null) {
-      addProduct(_formData["title"], _formData["description"],
-              _formData["image"], _formData["price"])
-          .then((_) {
-        Navigator.pushReplacementNamed(context, "/products")
-            .then((_) => selectProduct(null));
-      });
+    if (selectedProductIndex == -1) {
+      _submitAction(context, selectProduct, addProduct);
     } else {
-      updateProduct(_formData["title"], _formData["description"],
-              _formData["image"], _formData["price"])
-          .then((_) {
-        Navigator.pushReplacementNamed(context, "/products")
-            .then((_) => selectProduct(null));
-      });
+      _submitAction(context, selectProduct, updateProduct);
     }
+  }
+
+  void _submitAction(
+      BuildContext context, Function selectProduct, Function saveProduct) {
+    saveProduct(_formData["title"], _formData["description"],
+            _formData["image"], _formData["price"])
+        .then((bool success) {
+      if (success) {
+        _openProducts(context, selectProduct);
+      } else {
+        _showErrorDialog(context, selectProduct, saveProduct);
+      }
+    });
+  }
+
+  void _openProducts(BuildContext context, Function selectProduct) {
+    Navigator.pushReplacementNamed(context, "/products")
+        .then((_) => selectProduct(null));
+  }
+
+  void _showErrorDialog(
+      BuildContext context, Function selectProduct, Function saveProduct) {
+    ErrorDialog().show(context);
   }
 
   double _getTargetPadding(BuildContext context) {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_course/models/product.dart';
 import 'package:flutter_course/pages/auth.dart';
 import 'package:flutter_course/pages/product.dart';
 import 'package:flutter_course/pages/products.dart';
@@ -53,15 +54,19 @@ class _MyAppState extends State<MyApp> {
             return null;
           }
           if (pathElements[1] == 'product') {
-            final int index = int.parse(pathElements[2]);
+            final String productId = pathElements[2];
+            final Product product = model.allProducts
+                .firstWhere((product) => product.id == productId);
+            model.selectProduct(productId);
             return MaterialPageRoute<bool>(
-                builder: (BuildContext context) => ProductPage(index));
+                builder: (BuildContext context) => ProductPage(product));
           }
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {
           return MaterialPageRoute(
-              builder: (BuildContext context) => ProductsPage(model));
+            builder: (BuildContext context) => ProductsPage(model),
+          );
         },
       ),
     );

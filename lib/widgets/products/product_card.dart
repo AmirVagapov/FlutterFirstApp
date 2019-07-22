@@ -30,12 +30,13 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildTitlePriceContainer() {
     return Container(
-        padding: EdgeInsets.only(top: 10.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          TitleDefault(product.title),
-          SizedBox(width: 8.0),
-          PriceTag(product.price.toString())
-        ]));
+      padding: EdgeInsets.only(top: 10.0),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        TitleDefault(product.title),
+        SizedBox(width: 8.0),
+        PriceTag(product.price.toString())
+      ]),
+    );
   }
 
   Widget _buildButtonActions(BuildContext context) {
@@ -47,7 +48,7 @@ class ProductCard extends StatelessWidget {
             IconButton(
                 icon: Icon(Icons.info),
                 onPressed: () => Navigator.pushNamed<bool>(
-                    context, "/product/$productIndex")),
+                    context, "/product/${model.allProducts[productIndex].id}")),
             IconButton(
               icon: Icon(
                 model.allProducts[productIndex].isFavorite
@@ -56,7 +57,7 @@ class ProductCard extends StatelessWidget {
                 color: Colors.pink,
               ),
               onPressed: () {
-                model.selProductIndex(productIndex);
+                model.selectProduct(model.allProducts[productIndex].id);
                 model.toggleProductFavoriteStatus();
               },
             )

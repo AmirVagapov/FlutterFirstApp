@@ -1,3 +1,4 @@
+import 'package:flutter_course/network/network_service.dart' as networkService;
 import 'package:scoped_model/scoped_model.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
@@ -8,26 +9,59 @@ import '../models/user.dart';
 mixin ConnectedProductsModel on Model {
   User _authenticatedUser;
   List<Product> _products = [];
-  int _selProductIndex;
+  String _selProductId;
   bool _isLoading = false;
 
-  int get selectedProductIndex => _selProductIndex;
+  String get selectedProductId => _selProductId;
 
+  void _stopLoading() {
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void _startLoading() {
+    _isLoading = true;
+    notifyListeners();
+  }
+}
+
+mixin ProductsModel on ConnectedProductsModel {
   List<Product> get allProducts => List.from(_products);
 
-  void selProductIndex(int index) {
-    _selProductIndex = index;
-    if (index == null) {
+  bool _showFavorite = false;
+
+  bool get displayFavoritesOnly => _showFavorite;
+
+  Product get selectedProduct {
+    if (selectedProductId == null) {
+      return null;
+    }
+    return _products.firstWhere((product) => product.id == _selProductId);
+  }
+
+  List<Product> get displayedProducts {
+    if (_showFavorite) {
+      return _products.where((product) => product.isFavorite).toList();
+    }
+    return List.from(_products);
+  }
+
+  int get selectedProductIndex {
+    return _products.indexWhere((product) => product.id == _selProductId);
+  }
+
+  void selectProduct(String productId) {
+    _selProductId = productId;
+    if (productId == null) {
       notifyListeners();
     }
   }
 
-  Future<Null> addProduct(
-      String title, String description, String image, double price) {
-    _isLoading = true;
-    notifyListeners();
+  Future<bool> addProduct(
+      String title, String description, String image, double price) async {
+    _startLoading();
     final Product product = Product(
-        id: "",
+        id: Product.DEFAULT_ID,
         title: title,
         description: description,
         image:
@@ -36,12 +70,10 @@ mixin ConnectedProductsModel on Model {
         userEmail: _authenticatedUser.email,
         userId: _authenticatedUser.id);
 
-    return http
-        .post("https://flutter-products-f7955.firebaseio.com/products.json",
-            body: jsonEncode(product))
-        .then((http.Response response) {
-      final Map<String, dynamic> responseBody = json.decode(response.body);
+    try {
+      final http.Response response = await networkService.addProduct(product);
 
+      final Map<String, dynamic> responseBody = json.decode(response.body);
       final Product newProduct = Product(
           id: responseBody["name"],
           title: title,
@@ -52,35 +84,19 @@ mixin ConnectedProductsModel on Model {
           userId: _authenticatedUser.id);
 
       _products.add(newProduct);
-      _isLoading = false;
-      notifyListeners();
-    });
-  }
-}
-
-mixin ProductsModel on ConnectedProductsModel {
-  bool _showFavorite = false;
-
-  bool get displayFavoritesOnly => _showFavorite;
-
-  Product get selectedProduct {
-    if (selectedProductIndex == null) {
-      return null;
+      _stopLoading();
+      return true;
+    } catch (error) {
+      _stopLoading();
+      return false;
     }
-    return _products[selectedProductIndex];
-  }
-
-  List<Product> get displayedProducts {
-    if (_showFavorite) {
-      return _products.where((product) => product.isFavorite).toList();
-    }
-    return List.from(_products);
   }
 
   void toggleProductFavoriteStatus() {
     final isCurrentlyFavorite = selectedProduct.isFavorite;
     final newFavoriteStatus = !isCurrentlyFavorite;
     final updatedProduct = Product(
+        id: selectedProduct.id,
         title: selectedProduct.title,
         description: selectedProduct.description,
         image: selectedProduct.image,
@@ -89,16 +105,15 @@ mixin ProductsModel on ConnectedProductsModel {
         userId: _authenticatedUser.id,
         isFavorite: newFavoriteStatus);
     _products[selectedProductIndex] = updatedProduct;
-    _selProductIndex = null;
+    _selProductId = null;
     notifyListeners();
   }
 
-  Future<Null> updateProduct(
-      String title, String description, String image, double price) {
-    _isLoading = true;
-    notifyListeners();
+  Future<bool> updateProduct(
+      String title, String description, String image, double price) async {
+    _startLoading();
     final Product product = Product(
-        id: selectedProduct.id,
+        id: selectedProductId,
         title: title,
         description: description,
         image:
@@ -107,11 +122,9 @@ mixin ProductsModel on ConnectedProductsModel {
         userEmail: selectedProduct.userEmail,
         userId: selectedProduct.userId);
 
-    return http
-        .put(
-            "https://flutter-products-f7955.firebaseio.com/products/${selectedProduct.id}.json",
-            body: jsonEncode(product))
-        .then((http.Response response) {
+    try {
+      await networkService.updateProduct(product, selectedProductId);
+
       final Product updatedProduct = Product(
           id: selectedProduct.id,
           title: title,
@@ -121,50 +134,41 @@ mixin ProductsModel on ConnectedProductsModel {
           userEmail: selectedProduct.userEmail,
           userId: selectedProduct.userId);
       _products[selectedProductIndex] = updatedProduct;
-      _isLoading = false;
-      notifyListeners();
-    });
+      _stopLoading();
+      return true;
+    } catch (error) {
+      _stopLoading();
+      return false;
+    }
   }
 
-  void deleteProduct() {
+  Future<bool> deleteProduct() async {
     _isLoading = true;
     final deletedProductId = selectedProduct.id;
     _products.removeAt(selectedProductIndex);
-    _selProductIndex = null;
+    _selProductId = null;
     notifyListeners();
-    http
-        .delete(
-            "https://flutter-products-f7955.firebaseio.com/products/${deletedProductId}.json")
-        .then((http.Response response) {
-      _isLoading = false;
-      notifyListeners();
-    });
+
+    try {
+      await networkService.deleteProduct(deletedProductId);
+      _stopLoading();
+      return true;
+    } catch (error) {
+      _stopLoading();
+      return false;
+    }
   }
 
-  Future<Null> fetchProducts() {
-    _isLoading = true;
-    notifyListeners();
+  Future<Null> fetchProducts() async {
+    _startLoading();
 
-    return http
-        .get("https://flutter-products-f7955.firebaseio.com/products.json")
-        .then((http.Response response) {
-      final List<Product> fetchedProductList = [];
-      final Map<String, dynamic> productsData = jsonDecode(response.body);
-
-      if (productsData == null) {
-        _isLoading = false;
-        notifyListeners();
-      }
-
-      productsData.forEach((String productId, dynamic productData) {
-        final Product product = Product.fromJson(productData, productId);
-        fetchedProductList.add(product);
-      });
-
-      _products = fetchedProductList;
-      _isLoading = false;
-      notifyListeners();
-    });
+    try {
+      _products = await networkService.fetchProducts();
+      _stopLoading();
+      _selProductId = null;
+    } catch (error) {
+      _stopLoading();
+    }
   }
 
   void toggleFavoriteMode() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_course/pages/product_edit.dart';
 import 'package:flutter_course/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
+import '../widgets/ui_elements/dialog_error.dart';
 
 class ProductsListPage extends StatefulWidget {
   final MainModel model;
@@ -37,12 +38,15 @@ class ProductListPageState extends State<ProductsListPage> {
 
   Widget _buildListItem(BuildContext context, int index, MainModel model) {
     return Dismissible(
-      key: Key(index.toString()),
+      key: Key(model.allProducts[index].id),
       background: Container(color: Colors.red),
       onDismissed: (DismissDirection direction) {
         if (direction == DismissDirection.endToStart) {
-          model.selProductIndex(index);
-          model.deleteProduct();
+          model.selectProduct(model.allProducts[index].id);
+          model.deleteProduct().then((bool success) {
+            if(success) return;
+            ErrorDialog().show(context);
+          });
         }
       },
       child: Column(children: [
@@ -54,13 +58,13 @@ class ProductListPageState extends State<ProductsListPage> {
           trailing: IconButton(
             icon: Icon(Icons.edit),
             onPressed: () {
-              model.selProductIndex(index);
+              model.selectProduct(model.allProducts[index].id);
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (BuildContext context) {
                   return ProductEditPage();
                 }),
-              ).then((_) => model.selProductIndex(null));
+              ).then((_) => model.selectProduct(null));
             },
           ),
         ),

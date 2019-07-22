@@ -47,21 +47,22 @@ class _ProductPageState extends State<ProductsPage> {
 
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
-        child: Column(
-      children: <Widget>[
-        AppBar(
-          automaticallyImplyLeading: false,
-          title: Text("Choose"),
-        ),
-        ListTile(
-          leading: Icon(Icons.edit),
-          title: Text("Manage Products"),
-          onTap: () {
-            Navigator.pushReplacementNamed(context, "/admin");
-          },
-        )
-      ],
-    ));
+      child: Column(
+        children: <Widget>[
+          AppBar(
+            automaticallyImplyLeading: false,
+            title: Text("Choose"),
+          ),
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text("Manage Products"),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, "/admin");
+            },
+          )
+        ],
+      ),
+    );
   }
 
   Widget _buildProductList() {
