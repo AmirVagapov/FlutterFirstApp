@@ -1,4 +1,11 @@
-import 'package:flutter_course/network/network_service.dart' as networkService;
+import 'dart:async';
+
+import 'package:flutter_course/models/auth_mode.dart';
+import 'package:flutter_course/network/product_network_service.dart'
+    as productNetworkService;
+import 'package:flutter_course/network/user_network_service.dart'
+    as userNetworkService;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
@@ -71,7 +78,8 @@ mixin ProductsModel on ConnectedProductsModel {
         userId: _authenticatedUser.id);
 
     try {
-      final http.Response response = await networkService.addProduct(product);
+      final http.Response response = await productNetworkService.addProduct(
+          product, _authenticatedUser.token);
 
       final Map<String, dynamic> responseBody = json.decode(response.body);
       final Product newProduct = Product(
@@ -123,7 +131,8 @@ mixin ProductsModel on ConnectedProductsModel {
         userId: selectedProduct.userId);
 
     try {
-      await networkService.updateProduct(product, selectedProductId);
+      await productNetworkService.updateProduct(
+          product, selectedProductId, _authenticatedUser.token);
 
       final Product updatedProduct = Product(
           id: selectedProduct.id,
@@ -150,7 +159,8 @@ mixin ProductsModel on ConnectedProductsModel {
     notifyListeners();
 
     try {
-      await networkService.deleteProduct(deletedProductId);
+      await productNetworkService.deleteProduct(
+          deletedProductId, _authenticatedUser.token);
       _stopLoading();
       return true;
     } catch (error) {
@@ -163,7 +173,8 @@ mixin ProductsModel on ConnectedProductsModel {
     _startLoading();
 
     try {
-      _products = await networkService.fetchProducts();
+      _products =
+          await productNetworkService.fetchProducts(_authenticatedUser.token);
       _stopLoading();
       _selProductId = null;
     } catch (error) {
@@ -178,8 +189,86 @@ mixin ProductsModel on ConnectedProductsModel {
 }
 
 mixin UserModel on ConnectedProductsModel {
-  void login(String email, String password) {
-    _authenticatedUser = User(id: "vsmdkvk", email: email, password: password);
+  Timer _authTimer;
+  User get user => _authenticatedUser;
+
+  Future<Map<String, dynamic>> authenticate(
+      String email, String password, AuthMode authMode) async {
+    _startLoading();
+    final Map<String, dynamic> authData = {
+      "email": email,
+      "password": password,
+      "returnSecureToken": true
+    };
+    http.Response response;
+    if (authMode == AuthMode.Login) {
+      response = await userNetworkService.login(authData);
+    } else {
+      response = await userNetworkService.signup(authData);
+    }
+
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    bool hasError = true;
+    String message = "Something went wrong";
+    if (responseData.containsKey("idToken")) {
+      hasError = false;
+      message = "Authentication succeeded";
+      _authenticatedUser = User(
+          email: email,
+          id: responseData["localId"],
+          token: responseData['idToken']);
+      _setAuthTimeout(int.parse(responseData["expiresIn"]));
+      final prefs = await SharedPreferences.getInstance();
+      final DateTime now = DateTime.now();
+      final DateTime expiryTime =
+          now.add(Duration(seconds: int.parse(responseData["expiresIn"])));
+      prefs.setString("token", responseData["idToken"]);
+      prefs.setString("userEmail", email);
+      prefs.setString("userId", responseData["localId"]);
+      prefs.setString("expiryTime", expiryTime.toIso8601String());
+    } else if (responseData["error"]["message"] == "EMAIL_EXISTS") {
+      message = "This email already exist!";
+    } else if (responseData["error"]["message"] == "EMAIL_NOT_FOUND") {
+      message = "This email was not found!";
+    } else if (responseData["error"]["message"] == "INVALID_PASSWORD") {
+      message = "Password is invalid";
+    }
+    _stopLoading();
+    return {"success": !hasError, "message": message};
+  }
+
+  void autoAthenticate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+    final expiryTime = prefs.getString("expiryTime");
+    if (token != null) {
+      final DateTime now = DateTime.now();
+      final parsedExpiryTime = DateTime.parse(expiryTime);
+      if (parsedExpiryTime.isBefore(now)) {
+        _authenticatedUser = null;
+        notifyListeners();
+        return;
+      }
+      final userEmail = prefs.getString("userEmail");
+      final userId = prefs.getString("userId");
+      final int tokenLifespan = parsedExpiryTime.difference(now).inSeconds;
+      _setAuthTimeout(tokenLifespan);
+      _authenticatedUser = User(id: userId, email: userEmail, token: token);
+    }
+    notifyListeners();
+  }
+
+  void logout() async {
+    _authenticatedUser = null;
+    _authTimer.cancel();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+    prefs.remove("userEmail");
+    prefs.remove("userId");
+  }
+
+  void _setAuthTimeout(int time) {
+    _authTimer = Timer(Duration(seconds: time), () => logout);
   }
 }
 

@@ -152,11 +152,9 @@ class _ProductEditPageState extends State<ProductEditPage> {
     saveProduct(_formData["title"], _formData["description"],
             _formData["image"], _formData["price"])
         .then((bool success) {
-      if (success) {
-        _openProducts(context, selectProduct);
-      } else {
-        _showErrorDialog(context, selectProduct, saveProduct);
-      }
+      success
+          ? _openProducts(context, selectProduct)
+          : _showErrorDialog(context);
     });
   }
 
@@ -165,8 +163,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         .then((_) => selectProduct(null));
   }
 
-  void _showErrorDialog(
-      BuildContext context, Function selectProduct, Function saveProduct) {
+  void _showErrorDialog(BuildContext context) {
     ErrorDialog().show(context);
   }
 

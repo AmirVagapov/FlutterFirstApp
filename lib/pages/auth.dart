@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../scoped-models/main.dart';
+import '../models/auth_mode.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -16,7 +18,10 @@ class _AuthPageState extends State<AuthPage> {
   String _password;
   bool _acceptTerms = false;
 
+  AuthMode _authMode = AuthMode.Login;
+
   final GlobalKey<FormState> _authFormKey = GlobalKey<FormState>();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,17 +47,37 @@ class _AuthPageState extends State<AuthPage> {
                     _buildEmailTextField(),
                     SizedBox(height: 10.0),
                     _buildPasswordTextField(),
+                    _authMode == AuthMode.Signup
+                        ? _buildPasswordConfirmTextField()
+                        : Container(),
                     SizedBox(height: 10.0),
                     _buildAcceptSwitch(),
+                    SizedBox(height: 10.0),
+                    FlatButton(
+                      child: Text(
+                          "Switch to ${_authMode == AuthMode.Login ? "Signup" : "Login"}"),
+                      onPressed: () {
+                        setState(() {
+                          _authMode = _authMode == AuthMode.Login
+                              ? AuthMode.Signup
+                              : AuthMode.Login;
+                        });
+                      },
+                    ),
                     SizedBox(height: 10.0),
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
-                        return RaisedButton(
-                          textColor: Colors.white,
-                          child: Text("Login"),
-                          onPressed: () => _acceptForm(model.login),
-                        );
+                        return model.isLoading
+                            ? CircularProgressIndicator()
+                            : RaisedButton(
+                                textColor: Colors.white,
+                                child: Text(_authMode == AuthMode.Login
+                                    ? "Login"
+                                    : "Signup"),
+                                onPressed: () =>
+                                    _acceptForm(model.authenticate),
+                              );
                       },
                     )
                   ]),
@@ -81,7 +106,8 @@ class _AuthPageState extends State<AuthPage> {
         final bool isValidEmail = value.length < 5 ||
             !value.contains("@") ||
             !value.contains(".") ||
-            value.split('.').last.isEmpty;
+            value.split('.').last.isEmpty ||
+            value.split("@").last.startsWith(".");
         if (isValidEmail) {
           return "Invalid email";
         }
@@ -96,6 +122,7 @@ class _AuthPageState extends State<AuthPage> {
     return TextFormField(
       obscureText: true,
       decoration: _buildTextFieldInputDecoration("Enter password"),
+      controller: _passwordController,
       validator: (String value) {
         if (value.length < 5) {
           return "Password should contains at least 5 character";
@@ -104,6 +131,26 @@ class _AuthPageState extends State<AuthPage> {
       onSaved: (String value) {
         _password = value;
       },
+    );
+  }
+
+  Widget _buildPasswordConfirmTextField() {
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 10.0),
+        TextFormField(
+          obscureText: true,
+          decoration: _buildTextFieldInputDecoration("Confirm Password"),
+          validator: (String value) {
+            if (_passwordController.text != value) {
+              return "Password do not match";
+            }
+          },
+          onSaved: (String value) {
+            _password = value;
+          },
+        ),
+      ],
     );
   }
 
@@ -118,26 +165,36 @@ class _AuthPageState extends State<AuthPage> {
 
   Widget _buildAcceptSwitch() {
     return DecoratedBox(
-        decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.7),
-            borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            border: Border.all(color: Colors.grey, width: 1.0)),
-        child: SwitchListTile(
-          title: Text("Accept Terms and Pricay Policy"),
-          value: _acceptTerms,
-          onChanged: (bool value) {
-            setState(() {
-              _acceptTerms = value;
-            });
-          },
-        ));
+      decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+          border: Border.all(color: Colors.grey, width: 1.0)),
+      child: SwitchListTile(
+        title: Text("Accept Terms and Pricay Policy"),
+        value: _acceptTerms,
+        onChanged: (bool value) {
+          setState(() {
+            _acceptTerms = value;
+          });
+        },
+      ),
+    );
   }
 
-  void _acceptForm(Function login) {
+  void _acceptForm(Function authenticate) async {
     if (!_authFormKey.currentState.validate() || !_acceptTerms) return;
     _authFormKey.currentState.save();
-    login(_email, _password);
-    Navigator.pushReplacementNamed(context, '/products');
+    Map<String, dynamic> authInformation =
+        await authenticate(_email, _password, _authMode);
+
+    if (authInformation["success"]) {
+      Navigator.pushReplacementNamed(context, '/products');
+    } else {
+      ErrorDialog(
+              titleText: "An error occured",
+              contentText: authInformation["message"])
+          .show(context);
+    }
   }
 
   double _getTargetWidth(BuildContext context) {
