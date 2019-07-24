@@ -36,7 +36,7 @@ Future<List<Product>> fetchProducts(String tokenId) async {
 }
 
 Stream<Product> _streamProduct(String tokenId) async* {
-  http.Response response = await http.get(_defaultUrl(tokenId), headers: {"Content-Type": "application/json"});
+  http.Response response = await http.get(_defaultUrl(tokenId));
   print(response.body);
 
   final Map<String, dynamic> productsData = jsonDecode(response.body);
