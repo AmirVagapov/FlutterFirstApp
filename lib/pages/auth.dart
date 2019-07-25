@@ -187,9 +187,7 @@ class _AuthPageState extends State<AuthPage> {
     Map<String, dynamic> authInformation =
         await authenticate(_email, _password, _authMode);
 
-    if (authInformation["success"]) {
-      Navigator.pushReplacementNamed(context, '/products');
-    } else {
+    if (!authInformation["success"]) {
       ErrorDialog(
               titleText: "An error occured",
               contentText: authInformation["message"])

@@ -18,13 +18,13 @@ class ProductsListPage extends StatefulWidget {
 class ProductListPageState extends State<ProductsListPage> {
   @override
   void initState() {
-    widget.model.fetchProducts();
+    widget.model.fetchProducts(onlyForUser: true);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-        FocusScope.of(context).detach();
+    FocusScope.of(context).detach();
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       return RefreshIndicator(
@@ -33,7 +33,9 @@ class ProductListPageState extends State<ProductsListPage> {
                 _buildListItem(context, index, model),
             itemCount: model.allProducts.length,
           ),
-          onRefresh: model.fetchProducts);
+          onRefresh: () {
+            return model.fetchProducts(onlyForUser: true);
+          });
     });
   }
 

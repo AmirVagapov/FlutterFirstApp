@@ -10,22 +10,42 @@ String _defaultUrl(String tokenId) {
 String _getUrlWithProductId(String productId, String tokenId) =>
     "https://flutter-products-f7955.firebaseio.com/products/${productId}.json?auth=$tokenId";
 
-Future<http.Response> addProduct(Product product, String tokenId) {
-  return http.post(_defaultUrl(tokenId), body: jsonEncode(product));
+String _getUrlWithWishlist(String productId, String userId, String tokenId) =>
+    "https://flutter-products-f7955.firebaseio.com/products/${productId}/wishlistUser/$userId.json?auth=$tokenId";
+
+Future<http.Response> addProduct(Product product, String tokenId) async {
+  return await http.post(_defaultUrl(tokenId), body: jsonEncode(product));
+}
+
+Future<http.Response> addToWishlist(
+  String productId,
+  String userId,
+  String tokenId,
+) async {
+  return await http.put(_getUrlWithWishlist(productId, userId, tokenId),
+      body: json.encode(true));
+}
+
+Future<http.Response> removeFromToWishlist(
+  String productId,
+  String userID,
+  String tokenId,
+) async {
+  return await http.delete(_getUrlWithWishlist(productId, userID, tokenId));
 }
 
 Future<http.Response> updateProduct(
-    Product product, String productId, String tokenId) {
-  return http.put(_getUrlWithProductId(productId, tokenId),
+    Product product, String productId, String tokenId) async {
+  return await http.put(_getUrlWithProductId(productId, tokenId),
       body: jsonEncode(product));
 }
 
-Future<http.Response> deleteProduct(String productId, String tokenId) {
-  return http.delete(_getUrlWithProductId(productId, tokenId));
+Future<http.Response> deleteProduct(String productId, String tokenId) async {
+  return await http.delete(_getUrlWithProductId(productId, tokenId));
 }
 
-Future<List<Product>> fetchProducts(String tokenId) async {
-  final productStream = _streamProduct(tokenId);
+Future<List<Product>> fetchProducts(String tokenId, String userId) async {
+  final productStream = _streamProduct(tokenId, userId);
   final List<Product> fetchedProductList = [];
 
   await for (var product in productStream) {
@@ -35,7 +55,7 @@ Future<List<Product>> fetchProducts(String tokenId) async {
   return fetchedProductList;
 }
 
-Stream<Product> _streamProduct(String tokenId) async* {
+Stream<Product> _streamProduct(String tokenId, String userId) async* {
   http.Response response = await http.get(_defaultUrl(tokenId));
   print(response.body);
 
@@ -46,7 +66,13 @@ Stream<Product> _streamProduct(String tokenId) async* {
   }
 
   for (int i = 0; i < productsData.length; i++) {
-    yield Product.fromJson(
-        productsData.values.elementAt(i), productsData.keys.elementAt(i));
+    final bool isFavorite =
+        productsData.values.elementAt(i)["wishlistUser"] == null
+            ? false
+            : (productsData.values.elementAt(i)["wishlistUser"]
+                    as Map<String, dynamic>)
+                .containsKey(userId);
+    yield Product.fromJson(productsData.values.elementAt(i),
+        productsData.keys.elementAt(i), isFavorite);
   }
 }

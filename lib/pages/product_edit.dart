@@ -159,7 +159,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   void _openProducts(BuildContext context, Function selectProduct) {
-    Navigator.pushReplacementNamed(context, "/products")
+    Navigator.pushReplacementNamed(context, "/")
         .then((_) => selectProduct(null));
   }
 

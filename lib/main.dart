@@ -27,10 +27,16 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _model = MainModel();
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     _model.autoAthenticate();
+    _model.userSubject.listen((isAuthenticated) {
+      setState(() {
+        _isAuthenticated = isAuthenticated;
+      });
+    });
     super.initState();
   }
 
@@ -48,13 +54,10 @@ class _MyAppState extends State<MyApp> {
             buttonColor: Colors.purple),
         // home: AuthPage(),
         routes: {
-          "/": (BuildContext context) => ScopedModelDescendant<MainModel>(
-                  builder:
-                      (BuildContext context, Widget child, MainModel model) {
-                return model.user == null ? AuthPage() : ProductsPage(model);
-              }),
-          "/products": (BuildContext context) => ProductsPage(_model),
-          "/admin": (BuildContext context) => ProductsAdminPage(_model)
+          "/": (BuildContext context) =>
+              !_isAuthenticated ? AuthPage() : ProductsPage(_model),
+          "/admin": (BuildContext context) =>
+              !_isAuthenticated ? AuthPage() : ProductsAdminPage(_model)
         },
         onGenerateRoute: (RouteSettings settings) {
           ///        "/product/1"
@@ -69,13 +72,15 @@ class _MyAppState extends State<MyApp> {
                 .firstWhere((product) => product.id == productId);
             _model.selectProduct(productId);
             return MaterialPageRoute<bool>(
-                builder: (BuildContext context) => ProductPage(product));
+                builder: (BuildContext context) =>
+                    !_isAuthenticated ? AuthPage() : ProductPage(product));
           }
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {
           return MaterialPageRoute(
-            builder: (BuildContext context) => ProductsPage(_model),
+            builder: (BuildContext context) =>
+                !_isAuthenticated ? AuthPage() : ProductsPage(_model),
           );
         },
       ),

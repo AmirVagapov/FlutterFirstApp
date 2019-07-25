@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
+import 'package:rxdart/subjects.dart';
 
 import '../models/product.dart';
 import '../models/user.dart';
@@ -100,7 +101,7 @@ mixin ProductsModel on ConnectedProductsModel {
     }
   }
 
-  void toggleProductFavoriteStatus() {
+  void toggleProductFavoriteStatus() async {
     final isCurrentlyFavorite = selectedProduct.isFavorite;
     final newFavoriteStatus = !isCurrentlyFavorite;
     final updatedProduct = Product(
@@ -113,8 +114,31 @@ mixin ProductsModel on ConnectedProductsModel {
         userId: _authenticatedUser.id,
         isFavorite: newFavoriteStatus);
     _products[selectedProductIndex] = updatedProduct;
-    _selProductId = null;
+    final selectedProductId = selectedProduct.id;
     notifyListeners();
+    _selProductId = null;
+    http.Response response;
+    if (newFavoriteStatus) {
+      response = await productNetworkService.addToWishlist(
+          selectedProductId, _authenticatedUser.id, _authenticatedUser.token);
+    } else {
+      response = await productNetworkService.removeFromToWishlist(
+          selectedProductId, _authenticatedUser.id, _authenticatedUser.token);
+    }
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      final updatedProduct = Product(
+          id: selectedProductId,
+          title: selectedProduct.title,
+          description: selectedProduct.description,
+          image: selectedProduct.image,
+          price: selectedProduct.price,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id,
+          isFavorite: !newFavoriteStatus);
+      _products[selectedProductIndex] = updatedProduct;
+      notifyListeners();
+      _selProductId = null;
+    }
   }
 
   Future<bool> updateProduct(
@@ -128,7 +152,8 @@ mixin ProductsModel on ConnectedProductsModel {
             "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
         price: price,
         userEmail: selectedProduct.userEmail,
-        userId: selectedProduct.userId);
+        userId: selectedProduct.userId,
+        isFavorite: selectedProduct.isFavorite);
 
     try {
       await productNetworkService.updateProduct(
@@ -169,12 +194,18 @@ mixin ProductsModel on ConnectedProductsModel {
     }
   }
 
-  Future<Null> fetchProducts() async {
+  Future<Null> fetchProducts({onlyForUser = false}) async {
     _startLoading();
 
     try {
-      _products =
-          await productNetworkService.fetchProducts(_authenticatedUser.token);
+      final loadedProducts = await productNetworkService.fetchProducts(
+          _authenticatedUser.token, _authenticatedUser.id);
+      _products = onlyForUser
+          ? loadedProducts
+              .where(
+                  (Product product) => product.userId == _authenticatedUser.id)
+              .toList()
+          : loadedProducts;
       _stopLoading();
       _selProductId = null;
     } catch (error) {
@@ -190,6 +221,9 @@ mixin ProductsModel on ConnectedProductsModel {
 
 mixin UserModel on ConnectedProductsModel {
   Timer _authTimer;
+  final PublishSubject<bool> _userSubject = PublishSubject<bool>();
+
+  PublishSubject get userSubject => _userSubject;
   User get user => _authenticatedUser;
 
   Future<Map<String, dynamic>> authenticate(
@@ -217,6 +251,7 @@ mixin UserModel on ConnectedProductsModel {
           email: email,
           id: responseData["localId"],
           token: responseData['idToken']);
+      _userSubject.add(true);
       _setAuthTimeout(int.parse(responseData["expiresIn"]));
       final prefs = await SharedPreferences.getInstance();
       final DateTime now = DateTime.now();
@@ -254,8 +289,9 @@ mixin UserModel on ConnectedProductsModel {
       final int tokenLifespan = parsedExpiryTime.difference(now).inSeconds;
       _setAuthTimeout(tokenLifespan);
       _authenticatedUser = User(id: userId, email: userEmail, token: token);
+      _userSubject.add(true);
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   void logout() async {
@@ -265,10 +301,11 @@ mixin UserModel on ConnectedProductsModel {
     prefs.remove('token');
     prefs.remove("userEmail");
     prefs.remove("userId");
+    _userSubject.add(false);
   }
 
   void _setAuthTimeout(int time) {
-    _authTimer = Timer(Duration(seconds: time), () => logout);
+    _authTimer = Timer(Duration(seconds: time), logout);
   }
 }
 

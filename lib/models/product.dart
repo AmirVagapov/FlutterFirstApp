@@ -22,7 +22,7 @@ class Product {
       @required this.userId,
       this.isFavorite = false});
 
-  Product.fromJson(Map<String, dynamic> json, String productId)
+  Product.fromJson(Map<String, dynamic> json, String productId, bool isFavorite)
       : id = productId,
         title = json["title"],
         description = json["description"],
@@ -30,7 +30,7 @@ class Product {
         image = json["image"],
         userEmail = json["userEmail"],
         userId = json["userId"],
-        isFavorite = false;
+        isFavorite = isFavorite;
 
   Map<String, dynamic> toJson() => {
         "title": title,
