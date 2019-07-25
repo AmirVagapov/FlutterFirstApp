@@ -43,12 +43,12 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   Widget _buildContentBody([Product product]) {
     return Container(
-      padding: EdgeInsets.all(10.0),
+      margin: EdgeInsets.symmetric(horizontal: 10.0),
       child: Form(
         key: _formKey,
         child: ListView(
             padding:
-                EdgeInsets.symmetric(horizontal: _getTargetPadding(context)),
+                EdgeInsets.symmetric(horizontal: _getTargetPadding(context), vertical: 10.0),
             children: <Widget>[
               _builTitleTextField(product),
               _buildDescriptionTextField(product),

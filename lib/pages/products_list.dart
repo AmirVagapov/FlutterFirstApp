@@ -24,6 +24,7 @@ class ProductListPageState extends State<ProductsListPage> {
 
   @override
   Widget build(BuildContext context) {
+        FocusScope.of(context).detach();
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       return RefreshIndicator(
@@ -44,7 +45,7 @@ class ProductListPageState extends State<ProductsListPage> {
         if (direction == DismissDirection.endToStart) {
           model.selectProduct(model.allProducts[index].id);
           model.deleteProduct().then((bool success) {
-            if(success) return;
+            if (success) return;
             ErrorDialog().show(context);
           });
         }

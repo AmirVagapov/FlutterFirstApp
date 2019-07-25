@@ -1,7 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-final String key = 'AIzaSyCp0x0kxSPj2nk-oiOGjeEo7hc7PIDjoaY';
+import '../network/keys.dart';
 
 
 Future<http.Response> signup(Map<String, dynamic> authData) async {
