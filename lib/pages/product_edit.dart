@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_course/models/location_data.dart';
+import 'package:flutter_course/widgets/form_inputs/location.dart';
 import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../models/product.dart';
+import '../widgets/form_inputs/location.dart';
 import '../scoped-models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
@@ -17,7 +20,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
     "title": null,
     "description": null,
     "price": null,
-    "image": "assets/food.jpg"
+    "image": "assets/food.jpg",
+    "loc_data": null
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -47,12 +51,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
       child: Form(
         key: _formKey,
         child: ListView(
-            padding:
-                EdgeInsets.symmetric(horizontal: _getTargetPadding(context), vertical: 10.0),
+            padding: EdgeInsets.symmetric(
+                horizontal: _getTargetPadding(context), vertical: 10.0),
             children: <Widget>[
               _builTitleTextField(product),
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
+              SizedBox(height: 10.0),
+              LocationForm(_setLocation),
               SizedBox(height: 10.0),
               _buildSubmitButton()
             ]),
@@ -133,6 +139,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
+  void _setLocation(LocationData locData) {
+      _formData["loc_data"] = locData;
+  }
+
   void _submitForm(
       Function addProduct, Function updateProduct, Function selectProduct,
       [int selectedProductIndex]) {
@@ -150,7 +160,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   void _submitAction(
       BuildContext context, Function selectProduct, Function saveProduct) {
     saveProduct(_formData["title"], _formData["description"],
-            _formData["image"], _formData["price"])
+            _formData["image"], _formData["price"], _formData["loc_data"])
         .then((bool success) {
       success
           ? _openProducts(context, selectProduct)

@@ -28,11 +28,13 @@ class ProductListPageState extends State<ProductsListPage> {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       return RefreshIndicator(
-          child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) =>
-                _buildListItem(context, index, model),
-            itemCount: model.allProducts.length,
-          ),
+          child: model.isLoading
+              ? Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  itemBuilder: (BuildContext context, int index) =>
+                      _buildListItem(context, index, model),
+                  itemCount: model.allProducts.length,
+                ),
           onRefresh: () {
             return model.fetchProducts(onlyForUser: true);
           });

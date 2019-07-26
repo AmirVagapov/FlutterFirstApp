@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_course/models/auth_mode.dart';
+import 'package:flutter_course/models/location_data.dart';
 import 'package:flutter_course/network/product_network_service.dart'
     as productNetworkService;
 import 'package:flutter_course/network/user_network_service.dart'
@@ -61,12 +62,13 @@ mixin ProductsModel on ConnectedProductsModel {
   void selectProduct(String productId) {
     _selProductId = productId;
     if (productId == null) {
-      notifyListeners();
+      return;
     }
+    notifyListeners();
   }
 
-  Future<bool> addProduct(
-      String title, String description, String image, double price) async {
+  Future<bool> addProduct(String title, String description, String image,
+      double price, LocationData locData) async {
     _startLoading();
     final Product product = Product(
         id: Product.DEFAULT_ID,
@@ -80,7 +82,7 @@ mixin ProductsModel on ConnectedProductsModel {
 
     try {
       final http.Response response = await productNetworkService.addProduct(
-          product, _authenticatedUser.token);
+          product, _authenticatedUser.token, locData);
 
       final Map<String, dynamic> responseBody = json.decode(response.body);
       final Product newProduct = Product(

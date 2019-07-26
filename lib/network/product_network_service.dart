@@ -1,3 +1,4 @@
+import 'package:flutter_course/models/location_data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -13,8 +14,21 @@ String _getUrlWithProductId(String productId, String tokenId) =>
 String _getUrlWithWishlist(String productId, String userId, String tokenId) =>
     "https://flutter-products-f7955.firebaseio.com/products/${productId}/wishlistUser/$userId.json?auth=$tokenId";
 
-Future<http.Response> addProduct(Product product, String tokenId) async {
-  return await http.post(_defaultUrl(tokenId), body: jsonEncode(product));
+Future<http.Response> addProduct(
+    Product product, String tokenId, LocationData locData) async {
+  final Map<String, dynamic> data = {
+    'title': product.title,
+    'description': product.description,
+    'image':
+        'https://upload.wikimedia.org/wikipedia/commons/6/68/Chocolatebrownie.JPG',
+    'price': product.price,
+    'userEmail': product.userEmail,
+    'userId': product.userId,
+    'loc_lat': locData.latitude,
+    "loc_lng": locData.longitude,
+    "address": locData.address
+  };
+  return await http.post(_defaultUrl(tokenId), body: jsonEncode(data));
 }
 
 Future<http.Response> addToWishlist(
