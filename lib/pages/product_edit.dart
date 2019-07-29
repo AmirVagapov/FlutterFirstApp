@@ -24,6 +24,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     "loc_data": null
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
               SizedBox(height: 10.0),
-              LocationForm(_setLocation),
+              LocationForm(_setLocation, product),
               SizedBox(height: 10.0),
               _buildSubmitButton()
             ]),
@@ -74,9 +75,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _builTitleTextField(Product product) {
+    if (product != null && _titleController.text.isEmpty) {
+      _titleController.text = product.title;
+    } else if (product == null && _titleController.text.isEmpty) {
+      _titleController.text = "";
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Product Title"),
-      initialValue: product == null ? '' : product.title,
+      controller: _titleController,
       validator: (String value) {
         if (value.isEmpty) {
           return "Title is required";
@@ -140,7 +146,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   void _setLocation(LocationData locData) {
-      _formData["loc_data"] = locData;
+    _formData["loc_data"] = locData;
   }
 
   void _submitForm(
@@ -159,7 +165,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   void _submitAction(
       BuildContext context, Function selectProduct, Function saveProduct) {
-    saveProduct(_formData["title"], _formData["description"],
+    saveProduct(_titleController.text, _formData["description"],
             _formData["image"], _formData["price"], _formData["loc_data"])
         .then((bool success) {
       success

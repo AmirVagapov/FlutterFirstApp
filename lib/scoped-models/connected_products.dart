@@ -74,9 +74,9 @@ mixin ProductsModel on ConnectedProductsModel {
         id: Product.DEFAULT_ID,
         title: title,
         description: description,
-        image:
-            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+        image: image,
         price: price,
+        location: locData,
         userEmail: _authenticatedUser.email,
         userId: _authenticatedUser.id);
 
@@ -91,6 +91,7 @@ mixin ProductsModel on ConnectedProductsModel {
           description: description,
           image: image,
           price: price,
+          location: locData,
           userEmail: _authenticatedUser.email,
           userId: _authenticatedUser.id);
 
@@ -113,6 +114,7 @@ mixin ProductsModel on ConnectedProductsModel {
         image: selectedProduct.image,
         price: selectedProduct.price,
         userEmail: _authenticatedUser.email,
+        location: selectedProduct.location,
         userId: _authenticatedUser.id,
         isFavorite: newFavoriteStatus);
     _products[selectedProductIndex] = updatedProduct;
@@ -135,6 +137,7 @@ mixin ProductsModel on ConnectedProductsModel {
           image: selectedProduct.image,
           price: selectedProduct.price,
           userEmail: _authenticatedUser.email,
+          location: selectedProduct.location,
           userId: _authenticatedUser.id,
           isFavorite: !newFavoriteStatus);
       _products[selectedProductIndex] = updatedProduct;
@@ -143,18 +146,18 @@ mixin ProductsModel on ConnectedProductsModel {
     }
   }
 
-  Future<bool> updateProduct(
-      String title, String description, String image, double price) async {
+  Future<bool> updateProduct(String title, String description, String image,
+      double price, LocationData locData) async {
     _startLoading();
     final Product product = Product(
         id: selectedProductId,
         title: title,
         description: description,
-        image:
-            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+        image: "https://upload.wikimedia.org/wikipedia/commons/6/68/Chocolatebrownie.JPG",
         price: price,
         userEmail: selectedProduct.userEmail,
         userId: selectedProduct.userId,
+        location: locData,
         isFavorite: selectedProduct.isFavorite);
 
     try {
@@ -165,9 +168,10 @@ mixin ProductsModel on ConnectedProductsModel {
           id: selectedProduct.id,
           title: title,
           description: description,
-          image: image,
+          image: "https://upload.wikimedia.org/wikipedia/commons/6/68/Chocolatebrownie.JPG",
           price: price,
           userEmail: selectedProduct.userEmail,
+          location: locData,
           userId: selectedProduct.userId);
       _products[selectedProductIndex] = updatedProduct;
       _stopLoading();

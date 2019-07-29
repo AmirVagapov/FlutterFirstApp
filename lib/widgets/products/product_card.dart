@@ -20,7 +20,7 @@ class ProductCard extends StatelessWidget {
         children: <Widget>[
           NetworkImageWithPlaceholder(product.image),
           _buildTitlePriceContainer(),
-          AddressTag("Union Square, San Francisco"),
+          AddressTag(product.location.address),
           Text(product.userEmail),
           _buildButtonActions(context)
         ],
@@ -46,9 +46,10 @@ class ProductCard extends StatelessWidget {
           alignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton(
-                icon: Icon(Icons.info),
-                onPressed: () => Navigator.pushNamed<bool>(
-                    context, "/product/${model.allProducts[productIndex].id}")),
+              icon: Icon(Icons.info),
+              onPressed: () => Navigator.pushNamed<bool>(
+                  context, "/product/${model.allProducts[productIndex].id}"),
+            ),
             IconButton(
               icon: Icon(
                 model.allProducts[productIndex].isFavorite

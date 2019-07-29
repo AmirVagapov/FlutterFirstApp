@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_course/models/product.dart';
 import 'package:flutter_course/widgets/ui_elements/network_image_with_placeholder.dart';
 import 'package:flutter_course/widgets/ui_elements/title_default.dart';
-import 'package:scoped_model/scoped_model.dart';
-import '../scoped-models/main.dart';
+import 'package:map_view/map_view.dart';
 
 class ProductPage extends StatelessWidget {
   final Product product;
@@ -15,7 +14,6 @@ class ProductPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        print("On back pressed");
         Navigator.pop(context, false);
         return Future.value(false);
       },
@@ -29,7 +27,7 @@ class ProductPage extends StatelessWidget {
             SizedBox(height: 10.0),
             TitleDefault(product.title),
             SizedBox(height: 10.0),
-            _buildAddressPriceRow(product.price),
+            _buildAddressPriceRow(product.location.address, product.price),
             Container(
               child: Text(
                 product.description,
@@ -43,13 +41,16 @@ class ProductPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAddressPriceRow(double price) {
+  Widget _buildAddressPriceRow(String address, double price) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text(
-          "Union Square, San Francisco",
-          style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+        GestureDetector(
+          onTap: _showMap,
+          child: Text(
+            address,
+            style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+          ),
         ),
         Container(
           child: Text("|"),
@@ -61,5 +62,32 @@ class ProductPage extends StatelessWidget {
         )
       ],
     );
+  }
+
+  void _showMap() {
+    final mapView = MapView();
+    final List<Marker> marker = [
+      Marker("position", "Position", product.location.latitude,
+          product.location.longitude)
+    ];
+    mapView.show(
+        MapOptions(
+          mapViewType: MapViewType.normal,
+          initialCameraPosition: CameraPosition(
+            Location(product.location.latitude, product.location.longitude),
+            15.0,
+          ),
+        ),
+        toolbarActions: [ToolbarAction("Close", 1)]);
+
+    mapView.onToolbarAction.listen((int id) {
+      if (id == 1) {
+        mapView.dismiss();
+      }
+    });
+
+    mapView.onMapReady.listen((_) {
+      mapView.setMarkers(marker);
+    });
   }
 }

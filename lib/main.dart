@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
             final String productId = pathElements[2];
             final Product product = _model.allProducts
                 .firstWhere((product) => product.id == productId);
-            _model.selectProduct(productId);
+
             return MaterialPageRoute<bool>(
                 builder: (BuildContext context) =>
                     !_isAuthenticated ? AuthPage() : ProductPage(product));

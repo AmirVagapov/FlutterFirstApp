@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/location_data.dart';
 
 class Product {
   final String id;
@@ -8,6 +9,7 @@ class Product {
   final String image;
   final String userEmail;
   final String userId;
+  final LocationData location;
   final bool isFavorite;
 
   static const String DEFAULT_ID = "";
@@ -20,24 +22,32 @@ class Product {
       @required this.image,
       @required this.userEmail,
       @required this.userId,
+      @required this.location,
       this.isFavorite = false});
 
   Product.fromJson(Map<String, dynamic> json, String productId, bool isFavorite)
       : id = productId,
         title = json["title"],
         description = json["description"],
-        price = double.parse(json["price"]),
+        price = json["price"],
         image = json["image"],
         userEmail = json["userEmail"],
         userId = json["userId"],
+        location = LocationData(
+            address: json["address"],
+            latitude: json["loc_lat"],
+            longitude: json["loc_lng"]),
         isFavorite = isFavorite;
 
   Map<String, dynamic> toJson() => {
         "title": title,
         "description": description,
         "image": image,
-        "price": price.toString(),
+        "price": price.toDouble(),
         "userEmail": userEmail,
-        "userId": userId
+        "userId": userId,
+        "address": location.address,
+        "loc_lat": location.latitude,
+        "loc_lng": location.longitude
       };
 }
