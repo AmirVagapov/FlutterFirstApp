@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_course/models/auth_mode.dart';
 import 'package:flutter_course/models/location_data.dart';
@@ -9,8 +10,10 @@ import 'package:flutter_course/network/user_network_service.dart'
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import "package:http/http.dart" as http;
+import 'package:http_parser/http_parser.dart';
 import "dart:convert";
 import 'package:rxdart/subjects.dart';
+import 'package:mime/mime.dart';
 
 import '../models/product.dart';
 import '../models/user.dart';
@@ -67,14 +70,53 @@ mixin ProductsModel on ConnectedProductsModel {
     notifyListeners();
   }
 
-  Future<bool> addProduct(String title, String description, String image,
+  Future<Map<String, dynamic>> uploadImage(File imageFile,
+      {String imagePath}) async {
+    final mimeTypeData = lookupMimeType(imageFile.path).split("/");
+    final imageUploadRequest = http.MultipartRequest(
+        "POST",
+        Uri.parse(
+            "https://us-central1-flutter-products-f7955.cloudfunctions.net/storeImage"));
+    final file = await http.MultipartFile.fromPath("image", imageFile.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    imageUploadRequest.files.add(file);
+    if (imagePath != null) {
+      imageUploadRequest.fields["imagePath"] = Uri.encodeComponent(imagePath);
+    }
+
+    imageUploadRequest.headers["Authorization"] =
+        "Bearer ${_authenticatedUser.token}";
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        print(json.decode(response.body));
+        return null;
+      }
+      final responseData = json.decode(response.body);
+      return responseData;
+    } catch (error) {
+      print(error);
+      return null;
+    }
+  }
+
+  Future<bool> addProduct(String title, String description, File image,
       double price, LocationData locData) async {
     _startLoading();
+    final uploadData = await uploadImage(image);
+
+    if (uploadData == null) {
+      print("UploadingFailed");
+      return false;
+    }
+
     final Product product = Product(
         id: Product.DEFAULT_ID,
         title: title,
         description: description,
-        image: image,
+        image: uploadData["imageUrl"],
+        imagePath: uploadData["imagePath"],
         price: price,
         location: locData,
         userEmail: _authenticatedUser.email,
@@ -82,14 +124,15 @@ mixin ProductsModel on ConnectedProductsModel {
 
     try {
       final http.Response response = await productNetworkService.addProduct(
-          product, _authenticatedUser.token, locData);
+          product, _authenticatedUser.token, locData, uploadData['imagePath']);
 
       final Map<String, dynamic> responseBody = json.decode(response.body);
       final Product newProduct = Product(
           id: responseBody["name"],
           title: title,
           description: description,
-          image: image,
+          image: uploadData['imageUrl'],
+          imagePath: uploadData["imagePath"],
           price: price,
           location: locData,
           userEmail: _authenticatedUser.email,
@@ -112,6 +155,7 @@ mixin ProductsModel on ConnectedProductsModel {
         title: selectedProduct.title,
         description: selectedProduct.description,
         image: selectedProduct.image,
+        imagePath: selectedProduct.imagePath,
         price: selectedProduct.price,
         userEmail: _authenticatedUser.email,
         location: selectedProduct.location,
@@ -135,6 +179,7 @@ mixin ProductsModel on ConnectedProductsModel {
           title: selectedProduct.title,
           description: selectedProduct.description,
           image: selectedProduct.image,
+          imagePath: selectedProduct.imagePath,
           price: selectedProduct.price,
           userEmail: _authenticatedUser.email,
           location: selectedProduct.location,
@@ -146,14 +191,29 @@ mixin ProductsModel on ConnectedProductsModel {
     }
   }
 
-  Future<bool> updateProduct(String title, String description, String image,
+  Future<bool> updateProduct(String title, String description, File image,
       double price, LocationData locData) async {
     _startLoading();
+    String imageUrl = selectedProduct.image;
+    String imagePath = selectedProduct.imagePath;
+
+    if (image != null) {
+      final uploadData = await uploadImage(image);
+
+      if (uploadData == null) {
+        print("UploadingFailed");
+        return false;
+      }
+
+      imageUrl = uploadData["imageUrl"];
+      imagePath = uploadData["imagePath"];
+    }
     final Product product = Product(
         id: selectedProductId,
         title: title,
         description: description,
-        image: "https://upload.wikimedia.org/wikipedia/commons/6/68/Chocolatebrownie.JPG",
+        image: imageUrl,
+        imagePath: imagePath,
         price: price,
         userEmail: selectedProduct.userEmail,
         userId: selectedProduct.userId,
@@ -168,7 +228,8 @@ mixin ProductsModel on ConnectedProductsModel {
           id: selectedProduct.id,
           title: title,
           description: description,
-          image: "https://upload.wikimedia.org/wikipedia/commons/6/68/Chocolatebrownie.JPG",
+          image: imageUrl,
+          imagePath: imagePath,
           price: price,
           userEmail: selectedProduct.userEmail,
           location: locData,

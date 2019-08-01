@@ -30,11 +30,11 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildTitlePriceContainer() {
     return Container(
-      padding: EdgeInsets.only(top: 10.0),
+      padding: EdgeInsets.all(10.0),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        TitleDefault(product.title),
+        Expanded(child:TitleDefault(product.title), flex: 4),
         SizedBox(width: 8.0),
-        PriceTag(product.price.toString())
+        Expanded(child:PriceTag(product.price.toString()), flex: 1,)
       ]),
     );
   }

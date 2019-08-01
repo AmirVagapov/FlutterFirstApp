@@ -9,14 +9,14 @@ import 'package:flutter_course/pages/products.dart';
 import 'package:flutter_course/pages/products_admin.dart';
 import 'package:flutter_course/scoped-models/main.dart';
 import 'package:map_view/map_view.dart';
-
+import 'package:flutter_course/network/sensitive_info/keys.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 main() {
   // debugPaintSizeEnabled = true;
   // debugPaintBaselinesEnabled = true;
   // debugPaintPointersEnabled = true;
-  MapView.setApiKey("AIzaSyA2AbM1JMi0bkeoSIEECAF91tV-PxMeujo");
+  MapView.setApiKey(apiKey);
   runApp(MyApp());
 }
 
@@ -53,7 +53,8 @@ class _MyAppState extends State<MyApp> {
             primarySwatch: Colors.deepOrange,
             accentColor: Colors.purple,
             brightness: Brightness.light,
-            buttonColor: Colors.purple),
+            buttonColor: Colors.purple,
+            ),
         // home: AuthPage(),
         routes: {
           "/": (BuildContext context) =>

@@ -14,15 +14,15 @@ String _getUrlWithProductId(String productId, String tokenId) =>
 String _getUrlWithWishlist(String productId, String userId, String tokenId) =>
     "https://flutter-products-f7955.firebaseio.com/products/${productId}/wishlistUser/$userId.json?auth=$tokenId";
 
-Future<http.Response> addProduct(
-    Product product, String tokenId, LocationData locData) async {
+Future<http.Response> addProduct(Product product, String tokenId,
+    LocationData locData, String imagePath) async {
   final Map<String, dynamic> data = {
     'title': product.title,
     'description': product.description,
-    'image':
-        'https://upload.wikimedia.org/wikipedia/commons/6/68/Chocolatebrownie.JPG',
+    'imageUrl': product.image,
     'price': product.price,
     'userEmail': product.userEmail,
+    'imagePath': imagePath,
     'userId': product.userId,
     'loc_lat': locData.latitude,
     "loc_lng": locData.longitude,

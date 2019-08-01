@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:location/location.dart' as geolocation;
+import 'package:flutter_course/network/sensitive_info/keys.dart';
+
 
 class LocationForm extends StatefulWidget {
   final Function setLocation;
@@ -55,7 +57,7 @@ class _LocationFormState extends State<LocationForm> {
       final Uri uri = Uri.https(
         "maps.googleapis.com",
         "/maps/api/geocode/json",
-        {"address": address, "key": "AIzaSyA2AbM1JMi0bkeoSIEECAF91tV-PxMeujo"},
+        {"address": address, "key": apiKey},
       );
 
       final http.Response response = await http.get(uri);
@@ -69,7 +71,7 @@ class _LocationFormState extends State<LocationForm> {
           address: formattedAddress,
           latitude: coords["lat"],
           longitude: coords['lng']);
-    } else if (lat == null || lng == null) {
+    } else if (widget.product != null && (lat == null || lng == null)) {
       _locationData = widget.product.location;
     } else {
       _locationData =
@@ -78,7 +80,7 @@ class _LocationFormState extends State<LocationForm> {
 
     if (mounted) {
       final StaticMapProvider staticMapProvider =
-          StaticMapProvider("AIzaSyA2AbM1JMi0bkeoSIEECAF91tV-PxMeujo");
+          StaticMapProvider(apiKey);
       final Uri staticMapUri = staticMapProvider.getStaticUriWithMarkers([
         Marker("Position", "Position", _locationData.latitude,
             _locationData.longitude)
@@ -122,7 +124,7 @@ class _LocationFormState extends State<LocationForm> {
     final Uri uri = Uri.https(
       "maps.googleapis.com",
       "/maps/api/geocode/json",
-      {"latlng": "$lat,$lng", "key": "AIzaSyA2AbM1JMi0bkeoSIEECAF91tV-PxMeujo"},
+      {"latlng": "$lat,$lng", "key": apiKey},
     );
 
     final http.Response response = await http.get(uri);

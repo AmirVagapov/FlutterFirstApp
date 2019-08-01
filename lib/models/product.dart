@@ -7,6 +7,7 @@ class Product {
   final String description;
   final double price;
   final String image;
+  final String imagePath;
   final String userEmail;
   final String userId;
   final LocationData location;
@@ -20,6 +21,7 @@ class Product {
       @required this.description,
       @required this.price,
       @required this.image,
+      @required this.imagePath,
       @required this.userEmail,
       @required this.userId,
       @required this.location,
@@ -30,7 +32,8 @@ class Product {
         title = json["title"],
         description = json["description"],
         price = json["price"],
-        image = json["image"],
+        image = json["imageUrl"],
+        imagePath = json["imagePath"],
         userEmail = json["userEmail"],
         userId = json["userId"],
         location = LocationData(
@@ -42,7 +45,8 @@ class Product {
   Map<String, dynamic> toJson() => {
         "title": title,
         "description": description,
-        "image": image,
+        "imageUrl": image,
+        "imagePath": imagePath,
         "price": price.toDouble(),
         "userEmail": userEmail,
         "userId": userId,

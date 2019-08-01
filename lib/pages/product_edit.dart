@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_course/models/location_data.dart';
+import 'package:flutter_course/widgets/form_inputs/image.dart';
 import 'package:flutter_course/widgets/form_inputs/location.dart';
 import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../models/product.dart';
 import '../widgets/form_inputs/location.dart';
 import '../scoped-models/main.dart';
+import 'dart:io';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -20,11 +22,13 @@ class _ProductEditPageState extends State<ProductEditPage> {
     "title": null,
     "description": null,
     "price": null,
-    "image": "assets/food.jpg",
+    "image": null,
     "loc_data": null
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +65,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
               SizedBox(height: 10.0),
               LocationForm(_setLocation, product),
               SizedBox(height: 10.0),
+              ImageInput(_setImage, product),
+              SizedBox(height: 10.0),
               _buildSubmitButton()
             ]),
       ),
@@ -95,9 +101,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildDescriptionTextField(Product product) {
+    if (product != null && _descriptionController.text.isEmpty) {
+      _descriptionController.text = product.description;
+    } else if (product == null && _descriptionController.text.isEmpty) {
+      _descriptionController.text = "";
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Product Description"),
-      initialValue: product == null ? "" : product.description,
+      controller: _descriptionController,
       validator: (String value) {
         if (value.isEmpty || value.length < 5) {
           return "Description is required and should be at least 5 characters";
@@ -111,9 +122,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildPriceTextField(Product product) {
+    if (product != null && _priceController.text.isEmpty) {
+      _priceController.text = product.price.toString();
+    } else if (product == null && _priceController.text.isEmpty) {
+      _priceController.text = "";
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Product Price, \$"),
-      initialValue: product == null ? "" : product.price.toString(),
+      controller: _priceController,
       validator: (String value) {
         if (double.tryParse(value.replaceFirst(RegExp(r','), '.')) == null) {
           return "Price is required and should be a number";
@@ -149,10 +165,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
     _formData["loc_data"] = locData;
   }
 
-  void _submitForm(
-      Function addProduct, Function updateProduct, Function selectProduct,
-      [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate()) {
+  void _setImage(File imageFile) {
+    _formData["image"] = imageFile;
+  }
+
+  void _submitForm(Function addProduct, Function updateProduct,
+      Function selectProduct, int selectedProductIndex) {
+    if (!_formKey.currentState.validate() ||
+        (_formData["image"] == null && selectedProductIndex == -1)) {
       return;
     }
     _formKey.currentState.save();
@@ -165,7 +185,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   void _submitAction(
       BuildContext context, Function selectProduct, Function saveProduct) {
-    saveProduct(_titleController.text, _formData["description"],
+    saveProduct(_titleController.text, _descriptionController.text,
             _formData["image"], _formData["price"], _formData["loc_data"])
         .then((bool success) {
       success

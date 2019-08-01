@@ -25,7 +25,7 @@ class ProductPage extends StatelessWidget {
           child: Column(children: [
             NetworkImageWithPlaceholder(product.image),
             SizedBox(height: 10.0),
-            TitleDefault(product.title),
+            _buildTitleAndPrice(),
             SizedBox(height: 10.0),
             _buildAddressPriceRow(product.location.address, product.price),
             Container(
@@ -41,27 +41,52 @@ class ProductPage extends StatelessWidget {
     );
   }
 
+  Widget _buildTitleAndPrice() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.0),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: SizedBox(),
+            flex: 4,
+          ),
+          Expanded(
+            child: TitleDefault(product.title),
+            flex: 6,
+          ),
+          Expanded(
+            child: Text(
+              "\$${product.price}",
+              style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+            ),
+            flex: 2,
+          )
+        ],
+      ),
+    );
+  }
+  // Container(
+  //   child: Text("|"),
+  //   padding: EdgeInsets.symmetric(horizontal: 5.0),
+  // ),
+  // Text(
+  //   "\$$price",
+  //   style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+  // )
+
   Widget _buildAddressPriceRow(String address, double price) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        GestureDetector(
-          onTap: _showMap,
+    return GestureDetector(
+        onTap: _showMap,
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 10.0),
           child: Text(
             address,
-            style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
+            style: TextStyle(
+              fontFamily: "Oswald",
+              color: Colors.grey,
+            ),
           ),
-        ),
-        Container(
-          child: Text("|"),
-          padding: EdgeInsets.symmetric(horizontal: 5.0),
-        ),
-        Text(
-          "\$$price",
-          style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
-        )
-      ],
-    );
+        ));
   }
 
   void _showMap() {
