@@ -21,7 +21,6 @@ class ProductCard extends StatelessWidget {
           NetworkImageWithPlaceholder(product.image),
           _buildTitlePriceContainer(),
           AddressTag(product.location.address),
-          Text(product.userEmail),
           _buildButtonActions(context)
         ],
       ),
@@ -32,9 +31,12 @@ class ProductCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Expanded(child:TitleDefault(product.title), flex: 4),
+        Expanded(child: TitleDefault(product.title), flex: 4),
         SizedBox(width: 8.0),
-        Expanded(child:PriceTag(product.price.toString()), flex: 1,)
+        Expanded(
+          child: PriceTag(product.price.toString()),
+          flex: 1,
+        )
       ]),
     );
   }
@@ -46,10 +48,15 @@ class ProductCard extends StatelessWidget {
           alignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.info),
-              onPressed: () => Navigator.pushNamed<bool>(
-                  context, "/product/${model.allProducts[productIndex].id}"),
-            ),
+                icon: Icon(Icons.info),
+                onPressed: () {
+                  model.selectProduct(product.id);
+                  Navigator.pushNamed<bool>(context,
+                          "/product/${model.allProducts[productIndex].id}")
+                      .then((_) {
+                    model.selectProduct(null);
+                  });
+                }),
             IconButton(
               icon: Icon(
                 model.allProducts[productIndex].isFavorite
@@ -60,6 +67,7 @@ class ProductCard extends StatelessWidget {
               onPressed: () {
                 model.selectProduct(model.allProducts[productIndex].id);
                 model.toggleProductFavoriteStatus();
+                model.selectProduct(null);
               },
             )
           ],

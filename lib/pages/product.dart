@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_course/models/product.dart';
+import 'package:flutter_course/widgets/products/product_fab.dart';
 import 'package:flutter_course/widgets/ui_elements/network_image_with_placeholder.dart';
 import 'package:flutter_course/widgets/ui_elements/title_default.dart';
 import 'package:map_view/map_view.dart';
@@ -37,6 +38,7 @@ class ProductPage extends StatelessWidget {
             ),
           ]),
         ),
+        floatingActionButton: ProductFab(product),
       ),
     );
   }
@@ -65,14 +67,6 @@ class ProductPage extends StatelessWidget {
       ),
     );
   }
-  // Container(
-  //   child: Text("|"),
-  //   padding: EdgeInsets.symmetric(horizontal: 5.0),
-  // ),
-  // Text(
-  //   "\$$price",
-  //   style: TextStyle(fontFamily: "Oswald", color: Colors.grey),
-  // )
 
   Widget _buildAddressPriceRow(String address, double price) {
     return GestureDetector(

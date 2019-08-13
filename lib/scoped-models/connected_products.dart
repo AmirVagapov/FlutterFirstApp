@@ -164,7 +164,6 @@ mixin ProductsModel on ConnectedProductsModel {
     _products[selectedProductIndex] = updatedProduct;
     final selectedProductId = selectedProduct.id;
     notifyListeners();
-    _selProductId = null;
     http.Response response;
     if (newFavoriteStatus) {
       response = await productNetworkService.addToWishlist(
@@ -187,7 +186,6 @@ mixin ProductsModel on ConnectedProductsModel {
           isFavorite: !newFavoriteStatus);
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
-      _selProductId = null;
     }
   }
 
