@@ -19,25 +19,42 @@ class ProductPage extends StatelessWidget {
         return Future.value(false);
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(product.title),
-        ),
-        body: SingleChildScrollView(
-          child: Column(children: [
-            NetworkImageWithPlaceholder(product.image),
-            SizedBox(height: 10.0),
-            _buildTitleAndPrice(),
-            SizedBox(height: 10.0),
-            _buildAddressPriceRow(product.location.address, product.price),
-            Container(
-              child: Text(
-                product.description,
-                textAlign: TextAlign.center,
+        // appBar: AppBar(
+        //   title: Text(product.title),
+        // ),
+        body: CustomScrollView(slivers: <Widget>[
+          SliverAppBar(
+            expandedHeight: 256.0,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                child: Text(product.title),
+                alignment: Alignment.bottomCenter,
               ),
-              padding: EdgeInsets.all(10.0),
+              centerTitle: true,
+              background: Hero(
+                tag: product.id,
+                child: NetworkImageWithPlaceholder(product.image),
+              ),
             ),
-          ]),
-        ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              SizedBox(height: 10.0),
+              _buildTitleAndPrice(),
+              SizedBox(height: 10.0),
+              _buildAddress(product.location.address),
+              Container(
+                child: Text(
+                  product.description,
+                  textAlign: TextAlign.center,
+                ),
+                padding: EdgeInsets.all(10.0),
+              ),
+            ]),
+          ),
+        ]),
         floatingActionButton: ProductFab(product),
       ),
     );
@@ -68,7 +85,7 @@ class ProductPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAddressPriceRow(String address, double price) {
+  Widget _buildAddress(String address) {
     return GestureDetector(
         onTap: _showMap,
         child: Container(

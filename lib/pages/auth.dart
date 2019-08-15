@@ -13,15 +13,26 @@ class AuthPage extends StatefulWidget {
   }
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   String _email;
   String _password;
   bool _acceptTerms = false;
-
   AuthMode _authMode = AuthMode.Login;
+  AnimationController _controller;
+  Animation<Offset> _slideAnimation;
 
   final GlobalKey<FormState> _authFormKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _slideAnimation = Tween<Offset>(begin: Offset(0.0, -1.5), end: Offset.zero)
+        .animate(
+            CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,29 +58,17 @@ class _AuthPageState extends State<AuthPage> {
                     _buildEmailTextField(),
                     SizedBox(height: 10.0),
                     _buildPasswordTextField(),
-                    _authMode == AuthMode.Signup
-                        ? _buildPasswordConfirmTextField()
-                        : Container(),
+                    _buildPasswordConfirmTextField(),
                     SizedBox(height: 10.0),
                     _buildAcceptSwitch(),
                     SizedBox(height: 10.0),
-                    FlatButton(
-                      child: Text(
-                          "Switch to ${_authMode == AuthMode.Login ? "Signup" : "Login"}"),
-                      onPressed: () {
-                        setState(() {
-                          _authMode = _authMode == AuthMode.Login
-                              ? AuthMode.Signup
-                              : AuthMode.Login;
-                        });
-                      },
-                    ),
+                    _buildConfirmButton(),
                     SizedBox(height: 10.0),
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
                         return model.isLoading
-                            ? CircularProgressIndicator()
+                            ? Container(padding: EdgeInsets.symmetric(vertical: 5.0), child: CircularProgressIndicator())
                             : RaisedButton(
                                 textColor: Colors.white,
                                 child: Text(_authMode == AuthMode.Login
@@ -135,22 +134,31 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Widget _buildPasswordConfirmTextField() {
-    return Column(
-      children: <Widget>[
-        SizedBox(height: 10.0),
-        TextFormField(
-          obscureText: true,
-          decoration: _buildTextFieldInputDecoration("Confirm Password"),
-          validator: (String value) {
-            if (_passwordController.text != value) {
-              return "Password do not match";
-            }
-          },
-          onSaved: (String value) {
-            _password = value;
-          },
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Column(
+          children: <Widget>[
+            SizedBox(height: 10.0),
+            TextFormField(
+              obscureText: true,
+              decoration: _buildTextFieldInputDecoration("Confirm Password"),
+              validator: (String value) {
+                if (_passwordController.text != value &&
+                    _authMode == AuthMode.Signup) {
+                  return "Password do not match";
+                }
+              },
+              onSaved: (String value) {
+                if (_authMode == AuthMode.Signup) {
+                  _password = value;
+                }
+              },
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -178,6 +186,26 @@ class _AuthPageState extends State<AuthPage> {
           });
         },
       ),
+    );
+  }
+
+  Widget _buildConfirmButton() {
+    return FlatButton(
+      child:
+          Text("Switch to ${_authMode == AuthMode.Login ? "Signup" : "Login"}"),
+      onPressed: () {
+        if (_authMode == AuthMode.Login) {
+          setState(() {
+            _authMode = AuthMode.Signup;
+          });
+          _controller.forward();
+        } else {
+          setState(() {
+            _authMode = AuthMode.Login;
+          });
+          _controller.reverse();
+        }
+      },
     );
   }
 

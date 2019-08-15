@@ -82,10 +82,8 @@ class _ProductFabState extends State<ProductFab> with TickerProviderStateMixin {
               child: AnimatedBuilder(
                   animation: _controller,
                   builder: (BuildContext context, Widget child) {
-                    return Transform(
-                      alignment: FractionalOffset.center,
-                      transform:
-                          Matrix4.rotationZ(_controller.value * 0.5 * pi),
+                    return Transform.rotate(
+                      angle: _controller.value * 0.5 * pi,
                       child: Icon(_controller.isDismissed
                           ? Icons.more_vert
                           : Icons.close),

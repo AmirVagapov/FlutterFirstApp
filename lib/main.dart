@@ -8,6 +8,7 @@ import 'package:flutter_course/pages/product.dart';
 import 'package:flutter_course/pages/products.dart';
 import 'package:flutter_course/pages/products_admin.dart';
 import 'package:flutter_course/scoped-models/main.dart';
+import 'package:flutter_course/widgets/helpers/custom_route.dart';
 import 'package:map_view/map_view.dart';
 import 'package:flutter_course/network/sensitive_info/keys.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -74,14 +75,14 @@ class _MyAppState extends State<MyApp> {
             final Product product = _model.allProducts
                 .firstWhere((product) => product.id == productId);
 
-            return MaterialPageRoute<bool>(
+            return CustomRoute<bool>(
                 builder: (BuildContext context) =>
                     !_isAuthenticated ? AuthPage() : ProductPage(product));
           }
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {
-          return MaterialPageRoute(
+          return CustomRoute(
             builder: (BuildContext context) =>
                 !_isAuthenticated ? AuthPage() : ProductsPage(_model),
           );

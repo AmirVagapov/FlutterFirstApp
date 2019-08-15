@@ -100,7 +100,7 @@ class _LocationFormState extends State<LocationForm> {
 
   void _updateLocation() {
     if (!_addressInputFocusNode.hasFocus) {
-      _getStaticMapUri(_addressController.text);
+      _getStaticMapUri(_addressController.text,geocode: true);
     }
   }
 
