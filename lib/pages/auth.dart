@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course/widgets/helpers/adaptive_button.dart';
 import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../scoped-models/main.dart';
 import '../models/auth_mode.dart';
+import '../widgets/helpers/adaptive_progress.dart';
+import '../widgets/helpers/ui_utils.dart';
+import 'package:flutter/cupertino.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -38,6 +42,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: getSpecificElevation(context),
         title: Text("Authentification"),
       ),
       body: GestureDetector(
@@ -68,8 +73,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
                         return model.isLoading
-                            ? Container(padding: EdgeInsets.symmetric(vertical: 5.0), child: CircularProgressIndicator())
-                            : RaisedButton(
+                            ? Container(
+                                padding: EdgeInsets.symmetric(vertical: 5.0),
+                                child: AdaptiveProdgressIndicator())
+                            : AdaptiveButtonWidget(
                                 textColor: Colors.white,
                                 child: Text(_authMode == AuthMode.Login
                                     ? "Login"

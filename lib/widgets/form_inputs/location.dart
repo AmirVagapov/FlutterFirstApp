@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_course/models/location_data.dart';
 import 'package:flutter_course/models/product.dart';
+import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:map_view/map_view.dart';
 import 'package:map_view/map_view_type.dart';
 import 'package:map_view/marker.dart';
@@ -11,7 +12,6 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:location/location.dart' as geolocation;
 import 'package:flutter_course/network/sensitive_info/keys.dart';
-
 
 class LocationForm extends StatefulWidget {
   final Function setLocation;
@@ -79,8 +79,7 @@ class _LocationFormState extends State<LocationForm> {
     }
 
     if (mounted) {
-      final StaticMapProvider staticMapProvider =
-          StaticMapProvider(apiKey);
+      final StaticMapProvider staticMapProvider = StaticMapProvider(apiKey);
       final Uri staticMapUri = staticMapProvider.getStaticUriWithMarkers([
         Marker("Position", "Position", _locationData.latitude,
             _locationData.longitude)
@@ -100,7 +99,7 @@ class _LocationFormState extends State<LocationForm> {
 
   void _updateLocation() {
     if (!_addressInputFocusNode.hasFocus) {
-      _getStaticMapUri(_addressController.text,geocode: true);
+      _getStaticMapUri(_addressController.text, geocode: true);
     }
   }
 
@@ -116,6 +115,8 @@ class _LocationFormState extends State<LocationForm> {
           lat: currentCoords.latitude,
           lng: currentCoords.longitude);
     } catch (error) {
+      ErrorDialog(
+          titleText: "Couldn't fetch location", contentText: error.toString());
       print(error.toString());
     }
   }

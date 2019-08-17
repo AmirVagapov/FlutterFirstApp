@@ -3,6 +3,8 @@ import 'package:flutter_course/pages/product_edit.dart';
 import 'package:flutter_course/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../widgets/ui_elements/dialog_error.dart';
+import '../widgets/helpers/adaptive_progress.dart';
+import 'package:flutter/cupertino.dart';
 
 class ProductsListPage extends StatefulWidget {
   final MainModel model;
@@ -29,7 +31,7 @@ class ProductListPageState extends State<ProductsListPage> {
         builder: (BuildContext context, Widget child, MainModel model) {
       return RefreshIndicator(
           child: model.isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? Center(child: AdaptiveProdgressIndicator())
               : ListView.builder(
                   itemBuilder: (BuildContext context, int index) =>
                       _buildListItem(context, index, model),

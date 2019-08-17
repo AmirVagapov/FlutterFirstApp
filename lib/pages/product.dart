@@ -5,6 +5,8 @@ import 'package:flutter_course/widgets/products/product_fab.dart';
 import 'package:flutter_course/widgets/ui_elements/network_image_with_placeholder.dart';
 import 'package:flutter_course/widgets/ui_elements/title_default.dart';
 import 'package:map_view/map_view.dart';
+import '../widgets/helpers/ui_utils.dart';
+
 
 class ProductPage extends StatelessWidget {
   final Product product;
@@ -19,11 +21,10 @@ class ProductPage extends StatelessWidget {
         return Future.value(false);
       },
       child: Scaffold(
-        // appBar: AppBar(
-        //   title: Text(product.title),
-        // ),
+
         body: CustomScrollView(slivers: <Widget>[
           SliverAppBar(
+            elevation: getSpecificElevation(context),
             expandedHeight: 256.0,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(

@@ -9,10 +9,10 @@ String _defaultUrl(String tokenId) {
 }
 
 String _getUrlWithProductId(String productId, String tokenId) =>
-    "https://flutter-products-f7955.firebaseio.com/products/${productId}.json?auth=$tokenId";
+    "https://flutter-products-f7955.firebaseio.com/products/$productId.json?auth=$tokenId";
 
 String _getUrlWithWishlist(String productId, String userId, String tokenId) =>
-    "https://flutter-products-f7955.firebaseio.com/products/${productId}/wishlistUser/$userId.json?auth=$tokenId";
+    "https://flutter-products-f7955.firebaseio.com/products/$productId/wishlistUser/$userId.json?auth=$tokenId";
 
 Future<http.Response> addProduct(Product product, String tokenId,
     LocationData locData, String imagePath) async {

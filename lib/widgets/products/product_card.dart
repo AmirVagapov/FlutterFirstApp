@@ -9,9 +9,8 @@ import '../ui_elements/network_image_with_placeholder.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  final int productIndex;
 
-  ProductCard(this.product, this.productIndex);
+  ProductCard(this.product);
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +33,9 @@ class ProductCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Expanded(child: TitleDefault(product.title), flex: 4),
+        Flexible(child: TitleDefault(product.title)),
         SizedBox(width: 8.0),
-        Expanded(
-          child: PriceTag(product.price.toString()),
-          flex: 1,
-        )
+         PriceTag(product.price.toString()),
       ]),
     );
   }
@@ -55,20 +51,20 @@ class ProductCard extends StatelessWidget {
                 onPressed: () {
                   model.selectProduct(product.id);
                   Navigator.pushNamed<bool>(context,
-                          "/product/${model.allProducts[productIndex].id}")
+                          "/product/${product.id}")
                       .then((_) {
                     model.selectProduct(null);
                   });
                 }),
             IconButton(
               icon: Icon(
-                model.allProducts[productIndex].isFavorite
+                product.isFavorite
                     ? Icons.favorite
                     : Icons.favorite_border,
                 color: Colors.pink,
               ),
               onPressed: () {
-                model.selectProduct(model.allProducts[productIndex].id);
+                model.selectProduct(product.id);
                 model.toggleProductFavoriteStatus();
                 model.selectProduct(null);
               },

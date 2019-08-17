@@ -19,7 +19,7 @@ class Products extends StatelessWidget {
     if (products.isNotEmpty) {
       productCard = ListView.builder(
         itemBuilder: (BuildContext context, int index) =>
-            ProductCard(products[index], index),
+            ProductCard(products[index]),
         itemCount: products.length,
       );
     } else {

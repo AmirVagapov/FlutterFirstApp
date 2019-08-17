@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_course/models/location_data.dart';
 import 'package:flutter_course/widgets/form_inputs/image.dart';
@@ -9,6 +10,8 @@ import '../models/product.dart';
 import '../widgets/form_inputs/location.dart';
 import '../scoped-models/main.dart';
 import 'dart:io';
+import '../widgets/helpers/adaptive_progress.dart';
+import '../widgets/helpers/ui_utils.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -75,7 +78,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   Widget _buildPageWithAppBar(Product product) {
     return Scaffold(
-      appBar: AppBar(title: Text("Edit Product")),
+      appBar: AppBar(title: Text("Edit Product"), elevation: getSpecificElevation(context),),
       body: _buildContentBody(product),
     );
   }
@@ -136,8 +139,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         }
       },
       onSaved: (String value) {
-        _formData["price"] =
-            double.parse(value.replaceFirst(RegExp(r','), '.'));
+        _priceController.text = value.replaceFirst(RegExp(r','), '.');
       },
       keyboardType: TextInputType.number,
     );
@@ -147,7 +149,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
         return model.isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? Center(child: AdaptiveProdgressIndicator())
             : RaisedButton(
                 textColor: Colors.white,
                 child: Text("SAVE"),
@@ -185,8 +187,12 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   void _submitAction(
       BuildContext context, Function selectProduct, Function saveProduct) {
-    saveProduct(_titleController.text, _descriptionController.text,
-            _formData["image"], _formData["price"], _formData["loc_data"])
+    saveProduct(
+            _titleController.text,
+            _descriptionController.text,
+            _formData["image"],
+            double.parse(_priceController.text),
+            _formData["loc_data"])
         .then((bool success) {
       success
           ? _openProducts(context, selectProduct)

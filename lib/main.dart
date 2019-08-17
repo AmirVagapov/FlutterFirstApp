@@ -12,6 +12,7 @@ import 'package:flutter_course/widgets/helpers/custom_route.dart';
 import 'package:map_view/map_view.dart';
 import 'package:flutter_course/network/sensitive_info/keys.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter_course/shared/adaptive_theme.dart';
 
 main() {
   // debugPaintSizeEnabled = true;
@@ -49,13 +50,7 @@ class _MyAppState extends State<MyApp> {
       model: _model,
       child: MaterialApp(
         // debugShowMaterialGrid: true,
-        theme: ThemeData(
-            // buttonTheme: ButtonThemeData(buttonColor: Colors.lightBlue),
-            primarySwatch: Colors.deepOrange,
-            accentColor: Colors.purple,
-            brightness: Brightness.light,
-            buttonColor: Colors.purple,
-            ),
+        theme: getSpecificThemeData(context),
         // home: AuthPage(),
         routes: {
           "/": (BuildContext context) =>
@@ -64,7 +59,7 @@ class _MyAppState extends State<MyApp> {
               !_isAuthenticated ? AuthPage() : ProductsAdminPage(_model)
         },
         onGenerateRoute: (RouteSettings settings) {
-          ///        "/product/1"
+          ///        "/product/id"
 
           final List<String> pathElements = settings.name.split('/');
           if (pathElements[0] != '') {
