@@ -14,9 +14,7 @@ class AdaptiveButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return _getAdaptiveButton(child, onPressed, textColor, context);
   }
-}
-
-Widget _getAdaptiveButton(
+  Widget _getAdaptiveButton(
     Widget child, Function onPressed, Color textColor, BuildContext context) {
   if (Theme.of(context).platform == TargetPlatform.android) {
     return RaisedButton(
@@ -28,3 +26,6 @@ Widget _getAdaptiveButton(
     return CupertinoButton(child: child, onPressed: onPressed, color: Theme.of(context).buttonColor,);
   }
 }
+}
+
+

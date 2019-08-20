@@ -3,7 +3,7 @@ import 'package:flutter_course/pages/product_edit.dart';
 import 'package:flutter_course/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../widgets/ui_elements/dialog_error.dart';
-import '../widgets/helpers/adaptive_progress.dart';
+import '../shared/adaptive_widgets/adaptive_progress.dart';
 import 'package:flutter/cupertino.dart';
 
 class ProductsListPage extends StatefulWidget {

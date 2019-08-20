@@ -5,7 +5,7 @@ import 'package:flutter_course/widgets/products/product_fab.dart';
 import 'package:flutter_course/widgets/ui_elements/network_image_with_placeholder.dart';
 import 'package:flutter_course/widgets/ui_elements/title_default.dart';
 import 'package:map_view/map_view.dart';
-import '../widgets/helpers/ui_utils.dart';
+import '../shared/adaptive_widgets/ui_utils.dart';
 
 
 class ProductPage extends StatelessWidget {

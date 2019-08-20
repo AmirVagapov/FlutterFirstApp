@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_course/widgets/helpers/adaptive_button.dart';
+import 'package:flutter_course/shared/adaptive_widgets/adaptive_button.dart';
 import 'package:flutter_course/widgets/ui_elements/dialog_error.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../scoped-models/main.dart';
 import '../models/auth_mode.dart';
-import '../widgets/helpers/adaptive_progress.dart';
-import '../widgets/helpers/ui_utils.dart';
-import 'package:flutter/cupertino.dart';
+import '../shared/adaptive_widgets/adaptive_progress.dart';
+import '../shared/adaptive_widgets/ui_utils.dart';
+import '../shared/adaptive_widgets/adaptive_switch.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -180,20 +180,16 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
   Widget _buildAcceptSwitch() {
     return DecoratedBox(
-      decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.7),
-          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-          border: Border.all(color: Colors.grey, width: 1.0)),
-      child: SwitchListTile(
-        title: Text("Accept Terms and Pricay Policy"),
-        value: _acceptTerms,
-        onChanged: (bool value) {
-          setState(() {
-            _acceptTerms = value;
-          });
-        },
-      ),
-    );
+        decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.7),
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            border: Border.all(color: Colors.grey, width: 1.0)),
+        child: AdaptiveSwitch(
+            _acceptTerms, "Accept Terms and Privacy Policy", _setAcceptTerms));
+  }
+
+  void _setAcceptTerms(bool value) {
+    setState(() => {_acceptTerms = value});
   }
 
   Widget _buildConfirmButton() {

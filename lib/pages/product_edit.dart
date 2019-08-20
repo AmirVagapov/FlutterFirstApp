@@ -10,8 +10,8 @@ import '../models/product.dart';
 import '../widgets/form_inputs/location.dart';
 import '../scoped-models/main.dart';
 import 'dart:io';
-import '../widgets/helpers/adaptive_progress.dart';
-import '../widgets/helpers/ui_utils.dart';
+import '../shared/adaptive_widgets/adaptive_progress.dart';
+import '../shared/adaptive_widgets/ui_utils.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override

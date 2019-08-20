@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_course/pages/product_edit.dart';
 import 'package:flutter_course/pages/products_list.dart';
 import 'package:flutter_course/scoped-models/main.dart';
-import 'package:flutter_course/widgets/helpers/ui_utils.dart';
+import 'package:flutter_course/shared/adaptive_widgets/ui_utils.dart';
 import '../widgets/ui_elements/logout_list_tile.dart';
 
 class ProductsAdminPage extends StatelessWidget {
